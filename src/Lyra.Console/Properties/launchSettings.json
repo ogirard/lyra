@@ -1,0 +1,16 @@
+{
+  "profiles": {
+    "Lyra.Console-CleanMigration": {
+      "commandName": "Project",
+      "environmentVariables": {
+        "Lyra_Migration__RunCleanMigration": "true"
+      }
+    },
+    "Lyra.Console": {
+      "commandName": "Project",
+      "environmentVariables": {
+        "Lyra_Migration__RunCleanMigration": "false"
+      }
+    }
+  }
+}
