@@ -1,12 +1,12 @@
-<mvvm:LyraWindow
+<syncfusion:ChromelessWindow
     x:Class="Lyra.MainWindow"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:local="clr-namespace:Lyra"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:mvvm="clr-namespace:Lyra.Framework.MVVM"
     xmlns:songs="clr-namespace:Lyra.Features.Songs"
+    xmlns:syncfusion="http://schemas.syncfusion.com/wpf"
     Title="Lyra 2021"
     Width="1200"
     Height="650"
@@ -25,13 +25,18 @@
         </Grid.ColumnDefinitions>
 
         <Grid Grid.Row="0" Grid.Column="0">
-            <TextBox Margin="5" />
+            <!--<TextBox Margin="5" />-->
+            <syncfusion:ButtonAdv
+                Width="150"
+                Height="35"
+                Label="Hello World" />
         </Grid>
 
         <ListView
             Grid.Row="1"
             Grid.Column="0"
             Margin="5"
+            Background="White"
             ItemsSource="{Binding Songs}"
             SelectedValue="{Binding SelectedSong, Mode=OneWayToSource}"
             SelectionMode="Single">
@@ -87,4 +92,4 @@
             <TextBlock Text="TEST" />
         </Grid>
     </Grid>
-</mvvm:LyraWindow>
+</syncfusion:ChromelessWindow>

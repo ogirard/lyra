@@ -1,3 +1,4 @@
+using System;
 using System.IO;
 using LiteDB;
 using Microsoft.Extensions.Configuration;
@@ -23,7 +24,8 @@ namespace Lyra
             services.AddSingleton<ILiteDatabase>(sp =>
             {
                 var options = sp.GetRequiredService<IOptions<DatabaseOptions>>();
-                var connectionString = new ConnectionString(options.Value.ConnectionString);
+                var connectionString = new ConnectionString(options.Value.ConnectionString
+                    .Replace("%APPDATA%", Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData)));
                 Directory.CreateDirectory(Path.GetDirectoryName(connectionString.Filename));
                 return new LiteDatabase(connectionString);
             });

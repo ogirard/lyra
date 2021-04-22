@@ -41,6 +41,10 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
+    <PackageReference Include="Syncfusion.SfSkinManager.WPF" Version="19.1.0.57" />
+    <PackageReference Include="Syncfusion.Shared.WPF" Version="19.1.0.57" />
+    <PackageReference Include="Syncfusion.Themes.FluentLight.WPF" Version="19.1.0.57" />
+    <PackageReference Include="Syncfusion.Tools.WPF" Version="19.1.0.57" />
   </ItemGroup>
 
   <ItemGroup>

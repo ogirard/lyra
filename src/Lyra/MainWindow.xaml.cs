@@ -1,16 +1,18 @@
 using System;
-using Lyra.Framework.MVVM;
+using Syncfusion.SfSkinManager;
+using Syncfusion.Windows.Shared;
 
 namespace Lyra
 {
     /// <summary>
     /// Interaction logic for MainWindow.xaml
     /// </summary>
-    public partial class MainWindow : LyraWindow
+    public partial class MainWindow : ChromelessWindow
     {
         public MainWindow()
         {
             InitializeComponent();
+            SfSkinManager.SetTheme(this, new FluentTheme { ThemeName = "FluentLight", ShowAcrylicBackground = true });
         }
 
         public MainWindowViewModel ViewModel
