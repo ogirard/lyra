@@ -13,6 +13,7 @@ namespace Lyra
         {
             InitializeComponent();
             SfSkinManager.SetTheme(this, new FluentTheme { ThemeName = "FluentLight", ShowAcrylicBackground = true });
+            MaxWidth = int.MaxValue;
         }
 
         public MainWindowViewModel ViewModel

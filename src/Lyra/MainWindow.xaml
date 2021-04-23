@@ -9,7 +9,7 @@
     xmlns:syncfusion="http://schemas.syncfusion.com/wpf"
     Title="Lyra 2021"
     Width="1200"
-    Height="650"
+    Height="800"
     d:DataContext="{d:DesignInstance local:MainWindowViewModel}"
     Icon="Resources/logo-32.png"
     mc:Ignorable="d">

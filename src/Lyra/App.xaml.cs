@@ -30,8 +30,8 @@ namespace Lyra
         public App(Action<IServiceCollection> configureServices = null)
         {
             SyncfusionLicenseProvider.RegisterLicense("NDM1MDY1QDMxMzkyZTMxMmUzMGRmSWo1MkdMczNsdStibjd2RlphdHNqV002S0ttb0RITU8ra1pRU3FXR3c9");
-            InitializeTheme();
             Configuration = BuildConfiguration();
+            InitializeTheme();
             Log.Logger = new LoggerConfiguration()
                 .ReadFrom.Configuration(Configuration)
                 .CreateLogger();
@@ -49,19 +49,22 @@ namespace Lyra
             this.DispatcherUnhandledException += OnDispatcherUnhandledException;
         }
 
-        private static void InitializeTheme()
+        private void InitializeTheme()
         {
+            var options = Configuration.GetSection("Theme").Get<ThemeOptions>();
             SfSkinManager.ApplyStylesOnApplication = true;
 
             var themeSettings = new FluentLightThemeSettings
             {
-                BodyFontSize = 15,
-                HeaderFontSize = 18,
-                SubHeaderFontSize = 17,
-                TitleFontSize = 17,
-                SubTitleFontSize = 16,
-                BodyAltFontSize = 15,
-                FontFamily = new FontFamily("Roboto"),
+                PrimaryBackground = new SolidColorBrush((Color)ColorConverter.ConvertFromString(options.PrimaryBackground)),
+                PrimaryForeground = new SolidColorBrush((Color)ColorConverter.ConvertFromString(options.PrimaryForeground)),
+                HeaderFontSize = options.HeaderFontSize,
+                SubHeaderFontSize = options.SubHeaderFontSize,
+                TitleFontSize = options.TitleFontSize,
+                SubTitleFontSize = options.SubTitleFontSize,
+                BodyFontSize = options.BodyFontSize,
+                BodyAltFontSize = options.BodyAltFontSize,
+                FontFamily = new FontFamily(options.FontFamily),
             };
 
             var locale = new CultureInfo("de");
