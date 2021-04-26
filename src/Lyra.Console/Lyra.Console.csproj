@@ -22,7 +22,7 @@
 
   <ItemGroup>
     <None Update="appsettings.console.json">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Update="Migration\Data\lists.xml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>

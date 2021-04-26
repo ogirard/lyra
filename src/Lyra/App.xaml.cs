@@ -6,6 +6,7 @@ using System.Windows;
 using System.Windows.Markup;
 using System.Windows.Media;
 using System.Windows.Threading;
+using Lyra.Features.Search;
 using Lyra.Features.SessionTracking;
 using Lyra.Features.Songs;
 using Lyra.Features.Styles;
@@ -15,6 +16,7 @@ using Serilog;
 using Syncfusion.Licensing;
 using Syncfusion.SfSkinManager;
 using Syncfusion.Themes.FluentLight.WPF;
+using Syncfusion.Windows.Tools.Controls;
 
 namespace Lyra
 {
@@ -64,10 +66,10 @@ namespace Lyra
                 SubTitleFontSize = options.SubTitleFontSize,
                 BodyFontSize = options.BodyFontSize,
                 BodyAltFontSize = options.BodyAltFontSize,
-                FontFamily = new FontFamily(options.FontFamily),
+                FontFamily = new FontFamily("Segoe UI"),
             };
 
-            var locale = new CultureInfo("de");
+            var locale = new CultureInfo(Configuration.GetValue<string>("Locale"));
             Thread.CurrentThread.CurrentCulture = locale;
             Thread.CurrentThread.CurrentUICulture = locale;
             FrameworkElement.LanguageProperty.OverrideMetadata(
@@ -82,7 +84,7 @@ namespace Lyra
                 .SetBasePath(Directory.GetCurrentDirectory())
                 .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
                 .AddJsonFile("appsettings.logger.json", optional: false, reloadOnChange: true)
-                .AddJsonFile("appsettings.console.json", optional: false, reloadOnChange: true)
+                .AddJsonFile("appsettings.console.json", optional: true, reloadOnChange: true)
                 .AddJsonFile("appsettings.user.json", optional: true, reloadOnChange: true)
                 .AddEnvironmentVariables("Lyra_")
                 .AddCommandLine(Environment.GetCommandLineArgs())
@@ -96,6 +98,7 @@ namespace Lyra
             services.AddSong(Configuration);
             services.AddPresentationStyle(Configuration);
             services.AddSessionTracking(Configuration);
+            services.AddSearch(Configuration);
         }
 
         protected override void OnStartup(StartupEventArgs e)

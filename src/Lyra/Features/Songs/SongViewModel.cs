@@ -1,12 +1,14 @@
-using Lyra.Framework.MVVM;
+using ReactiveUI;
 
 namespace Lyra.Features.Songs
 {
-    public class SongViewModel : ViewModelBase
+    public class SongViewModel : ReactiveObject
     {
         private readonly Song song;
 
-        public string Number => song.Number.ToString().PadLeft(5, ' ');
+        public string Id => song.Id;
+
+        public string Number => song.Number.ToString();
 
         public string Title => song.Title;
 

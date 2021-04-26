@@ -16,9 +16,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="UI\" />
     <Folder Include="Features\Playlists\" />
-    <Folder Include="Features\Search\" />
   </ItemGroup>
 
   <ItemGroup>
@@ -29,6 +27,9 @@
     <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="5.0.0" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="5.0.1" />
     <PackageReference Include="Microsoft.Extensions.Options" Version="5.0.0" />
+    <PackageReference Include="Microsoft.Xaml.Behaviors.Wpf" Version="1.1.31" />
+    <PackageReference Include="ReactiveUI.Events.WPF" Version="13.2.18" />
+    <PackageReference Include="ReactiveUI.WPF" Version="13.2.18" />
     <PackageReference Include="Serilog.Enrichers.Environment" Version="2.1.3" />
     <PackageReference Include="Serilog.Enrichers.Thread" Version="3.1.0" />
     <PackageReference Include="Serilog.Expressions" Version="2.0.0" />
@@ -40,13 +41,17 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
+    <PackageReference Include="Syncfusion.SfInput.WPF" Version="19.1.0.57" />
     <PackageReference Include="Syncfusion.SfSkinManager.WPF" Version="19.1.0.57" />
+    <PackageReference Include="Syncfusion.SfTextInputLayout.WPF" Version="19.1.0.57" />
     <PackageReference Include="Syncfusion.Shared.WPF" Version="19.1.0.57" />
     <PackageReference Include="Syncfusion.Themes.FluentLight.WPF" Version="19.1.0.57" />
     <PackageReference Include="Syncfusion.Tools.WPF" Version="19.1.0.57" />
   </ItemGroup>
 
   <ItemGroup>
+    <Resource Include="Resources\CascadiaCodePL.ttf" />
+    <Resource Include="Resources\Roboto.ttf" />
     <Resource Include="Resources\logo-16.png" />
     <Resource Include="Resources\logo-32.png" />
     <Resource Include="Resources\logo-48.png" />
@@ -55,11 +60,17 @@
 
   <ItemGroup>
     <None Update="appsettings.json">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Update="appsettings.*.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <DependentUpon>appsettings.json</DependentUpon>
+    </None>
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="appsettings.logger.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
   </ItemGroup>
 

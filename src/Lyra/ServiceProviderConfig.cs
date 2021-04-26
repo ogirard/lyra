@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using LiteDB;
+using Lyra.UI;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
@@ -13,6 +14,7 @@ namespace Lyra
         {
             services.AddSingleton<MainWindow>();
             services.AddTransient<MainWindowViewModel>();
+            services.AddTransient<SongPresenterViewModel>();
             return services;
         }
 

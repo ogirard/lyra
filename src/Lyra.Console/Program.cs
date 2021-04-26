@@ -28,10 +28,12 @@ namespace Lyra.Console
                 s.AddSingleton<Migrator>();
             });
 
+            app.InitializeComponent();
+
             var runCleanMigration = app.Configuration.GetValue<bool>("Migration:RunCleanMigration");
             if (runCleanMigration)
             {
-                var dbPath = new FileInfo(app.Configuration.GetValue<string>("Database:ConnectionString").Replace("Filename=", string.Empty));
+                var dbPath = new FileInfo(app.Configuration.GetValue<string>("Database:ConnectionString").Replace("Filename=", string.Empty).Replace("%APPDATA%", Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData)));
                 if (dbPath.Exists)
                 {
                     dbPath.Delete();

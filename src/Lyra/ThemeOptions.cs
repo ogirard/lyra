@@ -17,7 +17,5 @@ namespace Lyra
         public int BodyFontSize { get; set; } = 12;
 
         public int BodyAltFontSize { get; set; } = 10;
-
-        public string FontFamily { get; set; } = "Roboto";
     }
 }

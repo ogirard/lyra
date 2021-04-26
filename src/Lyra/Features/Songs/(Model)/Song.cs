@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+
 namespace Lyra.Features.Songs
 {
     public class Song
@@ -11,5 +13,7 @@ namespace Lyra.Features.Songs
         public string Text { get; set; }
 
         public string StyleId { get; set; }
+
+        public List<string> Tags { get; set; } = new();
     }
 }
