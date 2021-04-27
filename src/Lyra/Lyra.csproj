@@ -13,6 +13,7 @@
     <None Remove="Resources\logo-32.png" />
     <None Remove="Resources\logo-48.png" />
     <None Remove="Resources\logo-64.png" />
+    <None Remove="splash.png" />
   </ItemGroup>
 
   <ItemGroup>
@@ -21,6 +22,7 @@
 
   <ItemGroup>
     <PackageReference Include="LiteDB" Version="5.0.10" />
+    <PackageReference Include="Lucene.Net" Version="4.8.0-beta00014" />
     <PackageReference Include="Microsoft.Extensions.Configuration" Version="5.0.0" />
     <PackageReference Include="Microsoft.Extensions.Configuration.CommandLine" Version="5.0.0" />
     <PackageReference Include="Microsoft.Extensions.Configuration.EnvironmentVariables" Version="5.0.0" />
@@ -41,12 +43,12 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="Syncfusion.SfInput.WPF" Version="19.1.0.57" />
-    <PackageReference Include="Syncfusion.SfSkinManager.WPF" Version="19.1.0.57" />
-    <PackageReference Include="Syncfusion.SfTextInputLayout.WPF" Version="19.1.0.57" />
-    <PackageReference Include="Syncfusion.Shared.WPF" Version="19.1.0.57" />
-    <PackageReference Include="Syncfusion.Themes.FluentLight.WPF" Version="19.1.0.57" />
-    <PackageReference Include="Syncfusion.Tools.WPF" Version="19.1.0.57" />
+    <PackageReference Include="Syncfusion.SfInput.WPF" Version="19.1.0.58" />
+    <PackageReference Include="Syncfusion.SfSkinManager.WPF" Version="19.1.0.58" />
+    <PackageReference Include="Syncfusion.SfTextInputLayout.WPF" Version="19.1.0.58" />
+    <PackageReference Include="Syncfusion.Shared.WPF" Version="19.1.0.58" />
+    <PackageReference Include="Syncfusion.Themes.FluentLight.WPF" Version="19.1.0.58" />
+    <PackageReference Include="Syncfusion.Tools.WPF" Version="19.1.0.58" />
   </ItemGroup>
 
   <ItemGroup>
@@ -56,6 +58,10 @@
     <Resource Include="Resources\logo-32.png" />
     <Resource Include="Resources\logo-48.png" />
     <Resource Include="Resources\logo-64.png" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Resource Include="Resources\splash.png" />
   </ItemGroup>
 
   <ItemGroup>

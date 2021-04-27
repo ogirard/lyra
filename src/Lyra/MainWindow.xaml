@@ -2,21 +2,70 @@
     x:Class="Lyra.MainWindow"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:b="http://schemas.microsoft.com/xaml/behaviors"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:local="clr-namespace:Lyra"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:songs="clr-namespace:Lyra.Features.Songs"
     xmlns:syncfusion="http://schemas.syncfusion.com/wpf"
-    Title="Lyra"
+    xmlns:syncfusionShared="clr-namespace:Syncfusion.Windows.Shared;assembly=Syncfusion.Shared.WPF"
+    xmlns:ui="clr-namespace:Lyra.UI"
+    Title=""
     Width="1200"
     Height="800"
     d:DataContext="{d:DesignInstance local:MainWindowViewModel}"
     Icon="Resources/logo-32.png"
+    ShowIcon="False"
     TitleBarForeground="{StaticResource PrimaryBrush}"
     TitleBarHeight="40"
     TitleFontSize="20"
     mc:Ignorable="d">
+    <syncfusion:ChromelessWindow.TitleBarTemplate>
+        <ControlTemplate TargetType="{x:Type syncfusionShared:TitleBar}">
+
+            <Border HorizontalAlignment="Stretch" Background="Transparent">
+                <Grid>
+                    <TextBlock
+                        Margin="0,0,125,0"
+                        HorizontalAlignment="Right"
+                        VerticalAlignment="Center"
+                        FontSize="10"
+                        Foreground="DarkGray"
+                        Text="{Binding WindowTitle}"
+                        TextAlignment="Right" />
+
+                    <TextBlock
+                        Margin="40,0,0,0"
+                        Padding="5,0,5,5"
+                        VerticalAlignment="Center"
+                        FontSize="20"
+                        Foreground="{StaticResource PrimaryBrush}"
+                        Text="Lyra" />
+
+                    <Menu
+                        Margin="2"
+                        HorizontalAlignment="Left"
+                        HorizontalContentAlignment="Left"
+                        IsMainMenu="True"
+                        SnapsToDevicePixels="True">
+                        <MenuItem HorizontalAlignment="Left">
+                            <MenuItem.Header>
+                                <Path
+                                    Width="20"
+                                    Height="20"
+                                    Margin="5"
+                                    Data="M12,67.96875L84,67.96875 85.55859375,68.26171875 86.859375,69.140625 87.73828125,70.44140625 88.03125,72 87.7734375,73.41796875 87,74.671875 85.8515625,75.57421875 84.46875,75.9375 84,76.03125 12,76.03125 10.44140625,75.73828125 9.14062595367432,74.859375 8.26171875,73.55859375 7.96875,72 8.2265625,70.58203125 9,69.328125 10.1484375,68.42578125 11.53125,68.0625 12,67.96875z M12,43.96875L84,43.96875 85.55859375,44.26171875 86.859375,45.140625 87.73828125,46.44140625 88.03125,48 87.7734375,49.40625 87,50.625 85.8515625,51.515625 84.46875,51.9375 84,52.03125 12,52.03125 10.44140625,51.73828125 9.14062595367432,50.859375 8.26171875,49.55859375 7.96875,48 8.2265625,46.58203125 9,45.328125 10.1484375,44.42578125 11.53125,44.0625 12,43.96875z M12,19.96875L84,19.96875 85.55859375,20.26171875 86.859375,21.140625 87.73828125,22.44140625 88.03125,24 87.7734375,25.41796875 87,26.671875 85.8515625,27.5742225646973 84.46875,27.9375 84,28.03125 12,28.03125 10.44140625,27.7382850646973 9.14062595367432,26.859375 8.26171875,25.5585956573486 7.96875,24 8.2265625,22.58203125 9,21.328125 10.1484375,20.42578125 11.53125,20.0625 12,19.96875z"
+                                    Fill="{StaticResource PrimaryBrush}"
+                                    Stretch="Uniform" />
+                            </MenuItem.Header>
+                            <MenuItem Header="Einstellungen" />
+                            <MenuItem Header="Über" />
+                        </MenuItem>
+                    </Menu>
+
+                    <ContentPresenter Margin="0,0,0,0" HorizontalAlignment="Stretch" />
+                </Grid>
+            </Border>
+        </ControlTemplate>
+    </syncfusion:ChromelessWindow.TitleBarTemplate>
     <Grid Margin="8">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
@@ -77,37 +126,76 @@
                     SuggestionMode="ContainsOrdinal"
                     Text="{Binding SearchText, Mode=OneWayToSource, UpdateSourceTrigger=PropertyChanged}"
                     TextHighlightMode="MultipleOccurrence"
-                    Watermark="Liedersuche" />
+                    Watermark="Liedersuche ..." />
             </Grid>
         </Grid>
 
-        <ListView
-            Grid.Row="1"
-            Grid.Column="0"
-            Margin="5"
-            ItemsSource="{Binding SongsView}"
-            SelectedValue="{Binding SelectedSong, Mode=TwoWay}"
-            SelectionMode="Single">
-            <b:Interaction.Triggers>
-                <b:EventTrigger EventName="MouseDoubleClick">
-                    <b:InvokeCommandAction Command="{Binding PresentSongCommand}" />
-                </b:EventTrigger>
-            </b:Interaction.Triggers>
-            <ListView.ItemTemplate>
-                <DataTemplate DataType="{x:Type songs:SongViewModel}">
-                    <StackPanel Orientation="Horizontal">
-                        <TextBlock
-                            Margin="2"
-                            Foreground="DarkGray"
-                            Text="{Binding Number}" />
-                        <TextBlock
-                            Margin="2"
-                            FontWeight="SemiBold"
-                            Text="{Binding Title}" />
-                    </StackPanel>
-                </DataTemplate>
-            </ListView.ItemTemplate>
-        </ListView>
+        <Grid Grid.Row="1" Grid.Column="0">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="*" />
+            </Grid.RowDefinitions>
+            <StackPanel Grid.Row="0" Orientation="Horizontal">
+
+                <TextBlock
+                    Margin="5"
+                    VerticalAlignment="Center"
+                    FontWeight="SemiBold"
+                    Text="LIEDER" />
+
+                <TextBlock
+                    Margin="10,5,5,5"
+                    VerticalAlignment="Center"
+                    Foreground="DimGray"
+                    Text="{Binding SongListInfo}" />
+            </StackPanel>
+
+
+            <ListView
+                Grid.Row="1"
+                Grid.Column="0"
+                Margin="5"
+                HorizontalContentAlignment="Stretch"
+                ItemsSource="{Binding SongsView}"
+                MouseDoubleClick="OnMouseDoubleClickListView"
+                ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                ScrollViewer.VerticalScrollBarVisibility="Auto"
+                SelectedValue="{Binding SelectedSong, Mode=TwoWay}"
+                SelectionMode="Single">
+                <ListView.ItemContainerStyle>
+                    <Style TargetType="ListViewItem">
+                        <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                    </Style>
+                </ListView.ItemContainerStyle>
+                <ListView.ItemTemplate>
+                    <DataTemplate DataType="{x:Type ui:SongViewModel}">
+                        <Grid ToolTip="{Binding ToolTip}">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock
+                                Grid.Column="0"
+                                MinWidth="28"
+                                Margin="2"
+                                HorizontalAlignment="Stretch"
+                                FontSize="12"
+                                Foreground="DimGray"
+                                Text="{Binding Number}"
+                                TextAlignment="Right" />
+                            <TextBlock
+                                Grid.Column="1"
+                                Margin="8,1,3,1"
+                                FontSize="14"
+                                FontWeight="SemiBold"
+                                Text="{Binding Title}"
+                                TextTrimming="CharacterEllipsis"
+                                TextWrapping="NoWrap" />
+                        </Grid>
+                    </DataTemplate>
+                </ListView.ItemTemplate>
+            </ListView>
+        </Grid>
 
         <Border
             Grid.Row="1"

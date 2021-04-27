@@ -6,6 +6,7 @@ using System.Windows;
 using System.Windows.Markup;
 using System.Windows.Media;
 using System.Windows.Threading;
+using Lyra.Features.Config;
 using Lyra.Features.Search;
 using Lyra.Features.SessionTracking;
 using Lyra.Features.Songs;
@@ -16,7 +17,6 @@ using Serilog;
 using Syncfusion.Licensing;
 using Syncfusion.SfSkinManager;
 using Syncfusion.Themes.FluentLight.WPF;
-using Syncfusion.Windows.Tools.Controls;
 
 namespace Lyra
 {
@@ -31,6 +31,9 @@ namespace Lyra
 
         public App(Action<IServiceCollection> configureServices = null)
         {
+            var splashScreen = new SplashScreen(GetType().Assembly, "Resources/splash.png");
+            splashScreen.Show(true, true);
+
             SyncfusionLicenseProvider.RegisterLicense("NDM1MDY1QDMxMzkyZTMxMmUzMGRmSWo1MkdMczNsdStibjd2RlphdHNqV002S0ttb0RITU8ra1pRU3FXR3c9");
             Configuration = BuildConfiguration();
             InitializeTheme();
@@ -53,23 +56,28 @@ namespace Lyra
 
         private void InitializeTheme()
         {
-            var options = Configuration.GetSection("Theme").Get<ThemeOptions>();
+            var lyraOptions = Configuration.GetSection("Lyra").Get<LyraOptions>();
+            var themeOptions = Configuration.GetSection("Theme").Get<ThemeOptions>();
             SfSkinManager.ApplyStylesOnApplication = true;
-
+            var primaryBrush = new SolidColorBrush((Color)ColorConverter.ConvertFromString(themeOptions.PrimaryBackground));
             var themeSettings = new FluentLightThemeSettings
             {
-                PrimaryBackground = new SolidColorBrush((Color)ColorConverter.ConvertFromString(options.PrimaryBackground)),
-                PrimaryForeground = new SolidColorBrush((Color)ColorConverter.ConvertFromString(options.PrimaryForeground)),
-                HeaderFontSize = options.HeaderFontSize,
-                SubHeaderFontSize = options.SubHeaderFontSize,
-                TitleFontSize = options.TitleFontSize,
-                SubTitleFontSize = options.SubTitleFontSize,
-                BodyFontSize = options.BodyFontSize,
-                BodyAltFontSize = options.BodyAltFontSize,
+                PrimaryBackground = primaryBrush,
+                PrimaryForeground = new SolidColorBrush((Color)ColorConverter.ConvertFromString(themeOptions.PrimaryForeground)),
+                HeaderFontSize = themeOptions.HeaderFontSize,
+                SubHeaderFontSize = themeOptions.SubHeaderFontSize,
+                TitleFontSize = themeOptions.TitleFontSize,
+                SubTitleFontSize = themeOptions.SubTitleFontSize,
+                BodyFontSize = themeOptions.BodyFontSize,
+                BodyAltFontSize = themeOptions.BodyAltFontSize,
                 FontFamily = new FontFamily("Segoe UI"),
+                ListAccentMedium = primaryBrush,
+                SystemAccentColor = primaryBrush,
+                ListAccentLow = primaryBrush,
+                ListAccentHigh = primaryBrush,
             };
 
-            var locale = new CultureInfo(Configuration.GetValue<string>("Locale"));
+            var locale = new CultureInfo(lyraOptions.Locale);
             Thread.CurrentThread.CurrentCulture = locale;
             Thread.CurrentThread.CurrentUICulture = locale;
             FrameworkElement.LanguageProperty.OverrideMetadata(
@@ -92,8 +100,9 @@ namespace Lyra
 
         private void ConfigureServices(ServiceCollection services)
         {
-            services.AddShell(Configuration);
+            services.AddUI(Configuration);
             services.AddDatabase(Configuration);
+            services.AddConfig(Configuration);
 
             services.AddSong(Configuration);
             services.AddPresentationStyle(Configuration);

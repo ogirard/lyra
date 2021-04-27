@@ -9,8 +9,11 @@
     Width="1024"
     Height="768"
     d:DataContext="{d:DesignInstance local:SongPresenterViewModel}"
-    Background="AntiqueWhite"
+    Background="{Binding PresentedSong.PresentationStyle.BackgroundColor}"
     BorderThickness="0"
+    FontFamily="{Binding PresentedSong.PresentationStyle.NormalFontFamily}"
+    FontSize="{Binding PresentedSong.PresentationStyle.FontSize}"
+    Foreground="{Binding PresentedSong.PresentationStyle.ForegroundColor}"
     KeyDown="OnKeyDown"
     WindowStyle="None"
     mc:Ignorable="d">
@@ -19,24 +22,31 @@
             <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
-        <StackPanel Grid.Row="0" Orientation="Horizontal">
+        <StackPanel
+            Grid.Row="0"
+            HorizontalAlignment="Stretch"
+            Background="{Binding PresentedSong.PresentationStyle.TitleBackgroundColor}"
+            Orientation="Horizontal"
+            Visibility="{Binding PresentedSong.PresentationStyle.TitleVisibility}">
             <TextBlock
                 Margin="5"
-                FontSize="35"
-                Foreground="DarkGray"
-                Text="{Binding PresentedSong.Number}" />
+                FontFamily="{Binding PresentedSong.PresentationStyle.TitleFontFamily}"
+                FontSize="{Binding PresentedSong.PresentationStyle.TitleFontSize}"
+                Foreground="{Binding PresentedSong.PresentationStyle.TitleForegroundColor}"
+                Text="{Binding PresentedSong.Number}"
+                Visibility="{Binding PresentedSong.PresentationStyle.TitleVisibility}" />
             <TextBlock
                 Margin="5"
-                FontSize="35"
+                FontFamily="{Binding PresentedSong.PresentationStyle.TitleFontFamily}"
+                FontSize="{Binding PresentedSong.PresentationStyle.TitleFontSize}"
                 FontWeight="Bold"
-                Foreground="{StaticResource PrimaryBrush}"
+                Foreground="{Binding PresentedSong.PresentationStyle.TitleForegroundColor}"
                 Text="{Binding PresentedSong.Title}" />
         </StackPanel>
 
         <TextBlock
             Grid.Row="1"
             Margin="5"
-            FontSize="25"
             Text="{Binding PresentedSong.Text}"
             TextWrapping="Wrap" />
     </Grid>

@@ -1,10 +1,9 @@
 using System;
 using System.Reactive.Linq;
 using System.Windows;
-using System.Windows.Forms;
+using System.Windows.Input;
 using DynamicData.Binding;
 using Lyra.UI;
-using ReactiveUI;
 using Syncfusion.SfSkinManager;
 using Syncfusion.Windows.Shared;
 
@@ -15,23 +14,20 @@ namespace Lyra
     /// </summary>
     public partial class MainWindow : ChromelessWindow
     {
-        public MainWindow()
+        public MainWindow(SongPresenter songPresenter)
         {
             InitializeComponent();
             SfSkinManager.SetTheme(this, new FluentTheme { ThemeName = "FluentLight", ShowAcrylicBackground = true });
             MaxWidth = int.MaxValue;
+            Loaded += OnLoaded;
+            Presenter = songPresenter;
         }
 
-        protected override void OnActivated(EventArgs e)
+        private void OnLoaded(object sender, RoutedEventArgs e)
         {
-            base.OnActivated(e);
-            ViewModel.Activate();
-            Presenter = new SongPresenter
-            {
-                Owner = this,
-                ViewModel = ViewModel.SongPresenterViewModel,
-                WindowState = WindowState.Maximized,
-            };
+            ViewModel.Initialize();
+            Presenter.Owner = this;
+            Presenter.ViewModel = ViewModel.SongPresenterViewModel;
             this.ViewModel.SongPresenterViewModel.WhenValueChanged(x => x.IsPresentationActive, false).Subscribe(isPresentationActive =>
             {
                 if (isPresentationActive)
@@ -52,5 +48,13 @@ namespace Lyra
         }
 
         public SongPresenter Presenter { get; set; }
+
+        private void OnMouseDoubleClickListView(object sender, MouseButtonEventArgs e)
+        {
+            if (e.ChangedButton == MouseButton.Left && ViewModel.PresentSongCommand.CanExecute(null))
+            {
+                ViewModel.PresentSongCommand.Execute(null);
+            }
+        }
     }
 }

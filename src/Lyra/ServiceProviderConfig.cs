@@ -10,17 +10,19 @@ namespace Lyra
 {
     public static class ServiceProviderConfig
     {
-        public static IServiceCollection AddShell(this IServiceCollection services, IConfiguration configuration)
+        public static IServiceCollection AddUI(this IServiceCollection services, IConfiguration configuration)
         {
             services.AddSingleton<MainWindow>();
             services.AddTransient<MainWindowViewModel>();
             services.AddTransient<SongPresenterViewModel>();
+            services.AddTransient<SongPresenter>();
             return services;
         }
 
         public static IServiceCollection AddDatabase(this IServiceCollection services, IConfiguration configuration)
         {
             services.Configure<DatabaseOptions>(configuration.GetSection("Database"));
+            services.Configure<LyraOptions>(configuration.GetSection("Lyra"));
 
             // Register db and repo
             services.AddSingleton<ILiteDatabase>(sp =>

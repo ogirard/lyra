@@ -1,7 +1,9 @@
 using System;
 using System.IO;
+using System.Linq;
 using Lyra.Console.Migration.LegacyModel;
 using Lyra.Features.Songs;
+using Lyra.Features.Styles;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
@@ -12,25 +14,54 @@ namespace Lyra.Console.Migration
         private readonly ILogger<Migrator> logger;
         private readonly DatabaseOptions databaseOptions;
         private readonly ISongRepository songRepository;
+        private readonly IStyleRepository styleRepository;
 
-        public Migrator(ILogger<Migrator> logger, IOptionsMonitor<DatabaseOptions> dataOptions, ISongRepository songRepository)
+        public Migrator(ILogger<Migrator> logger, IOptionsMonitor<DatabaseOptions> dataOptions, ISongRepository songRepository, IStyleRepository styleRepository)
         {
             this.logger = logger;
             this.databaseOptions = dataOptions.CurrentValue;
             this.songRepository = songRepository;
+            this.styleRepository = styleRepository;
         }
 
         public LegacySongStore InitializeLegacyStore()
         {
             var legacyStore = LegacySongStore.ParseXml(@".\Migration\Data\lyrasongs.xml", @".\Migration\Data\lyrastyles.xml", @".\Migration\Data\lists.xml");
-            foreach (var song in legacyStore.Songs)
+
+            var defaultStyle = new PresentationStyle
+            {
+                Id = "Style/1",
+                Body = new BodyStyle
+                {
+                    BackgroundColor = "#FF000000",
+                    ForegroundColor = "#FFFFFFFF",
+                    FontSize = 25,
+                    NormalFont = "Roboto",
+                    SpecialFont = "Roboto Slab",
+                    MutedFont = "Roboto Mono",
+                    UseBackgroundImage = false,
+                },
+                Title = new TitleStyle
+                {
+                    BackgroundColor = "#FFCCCCCC",
+                    ForegroundColor = "#FFB76BAB",
+                    FontSize = 35,
+                    Mode = TitleStyle.TitleMode.ShowNumberAndTitle,
+                    TitleFont = "Roboto Slab",
+                },
+            };
+            styleRepository.AddStyle(defaultStyle);
+
+            var songId = 1;
+            foreach (var song in legacyStore.Songs.OrderBy(s => s.Number))
             {
                 songRepository.AddSong(new()
                 {
-                    Id = song.Id,
+                    Id = $"Song/{songId++}",
                     Number = song.Number,
                     Title = song.Title,
                     Text = song.Text,
+                    StyleId = defaultStyle.Id,
                 });
             }
 

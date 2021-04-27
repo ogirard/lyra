@@ -5,12 +5,14 @@ using System.ComponentModel;
 using System.Linq;
 using System.Reactive.Linq;
 using System.Windows.Data;
+using System.Windows.Forms.VisualStyles;
 using System.Windows.Input;
-using DynamicData.Binding;
 using Lyra.Features.Search;
 using Lyra.Features.Songs;
+using Lyra.Features.Styles;
 using Lyra.UI;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using ReactiveUI;
 
 namespace Lyra
@@ -20,13 +22,17 @@ namespace Lyra
         private readonly ILogger<MainWindowViewModel> logger;
         private readonly ISongRepository songRepository;
         private readonly ISearchService searchService;
+        private readonly IStyleRepository styleRepository;
 
         private ObservableCollection<SongViewModel> songs;
         private ObservableCollection<string> songTags;
+        private ObservableCollection<PresentationStyleViewModel> styles;
         private SongViewModel selectedSong;
         private ObservableCollection<object> searchItems;
         private string searchText;
         private string presentSongButtonText;
+        private string songListInfo;
+        private string windowTitle;
         private Dictionary<string, SearchResult> searchResults = new();
 
         public ObservableCollection<SongViewModel> Songs
@@ -41,8 +47,25 @@ namespace Lyra
             {
                 var view = CollectionViewSource.GetDefaultView(Songs);
                 view.Filter = FilterSong;
+                view.SortDescriptions.Add(new SortDescription("Rank", ListSortDirection.Ascending));
+                view.SortDescriptions.Add(new SortDescription("Number", ListSortDirection.Ascending));
+                SongListInfo = searchResults.Count == songs.Count
+                    ? $"Alle {songs.Count} Lieder"
+                    : $"{searchResults.Count} von {songs.Count} Lieder";
                 return view;
             }
+        }
+
+        public string SongListInfo
+        {
+            get => songListInfo;
+            set => this.RaiseAndSetIfChanged(ref songListInfo, value);
+        }
+
+        public ObservableCollection<PresentationStyleViewModel> Styles
+        {
+            get => styles;
+            set => this.RaiseAndSetIfChanged(ref styles, value);
         }
 
         public SongViewModel SelectedSong
@@ -75,24 +98,42 @@ namespace Lyra
             set => this.RaiseAndSetIfChanged(ref presentSongButtonText, value);
         }
 
+        public string WindowTitle
+        {
+            get => windowTitle;
+            set => this.RaiseAndSetIfChanged(ref windowTitle, value);
+        }
+
         public SongPresenterViewModel SongPresenterViewModel { get; }
 
         public ICommand PresentSongCommand { get; }
 
-        public MainWindowViewModel(ILogger<MainWindowViewModel> logger, ISongRepository songRepository, ISearchService searchService, SongPresenterViewModel songPresenterViewModel)
+        public MainWindowViewModel(
+            ILogger<MainWindowViewModel> logger,
+            IOptionsMonitor<LyraOptions> options,
+            ISongRepository songRepository,
+            ISearchService searchService,
+            IStyleRepository styleRepository,
+            SongPresenterViewModel songPresenterViewModel)
         {
             this.logger = logger;
             this.songRepository = songRepository;
             this.searchService = searchService;
+            this.styleRepository = styleRepository;
 
             Songs = new ObservableCollection<SongViewModel>();
             SongTags = new ObservableCollection<string>();
+            Styles = new ObservableCollection<PresentationStyleViewModel>();
             PresentSongCommand = ReactiveCommand.Create(PresentSong, this.WhenAnyValue(x => x.SelectedSong).Select(x => x != null));
             SongPresenterViewModel = songPresenterViewModel;
-            this.WhenValueChanged(x => x.SelectedSong, false).Subscribe(selectedSong =>
-            {
-                PresentSongButtonText = selectedSong != null ? $"Lied '{selectedSong.Number} {selectedSong.Title}' anzeigen" : "Kein Lied ausgewählt";
-            });
+            WindowTitle = $"Version {options.CurrentValue.Version}";
+            this.WhenAnyValue(x => x.SelectedSong)
+                .Subscribe(selectedSong =>
+                {
+                    PresentSongButtonText = selectedSong != null
+                        ? $"Lied '{selectedSong.Number} {selectedSong.Title}' anzeigen"
+                        : "Kein Lied ausgewählt";
+                });
         }
 
         private void PresentSong()
@@ -109,11 +150,18 @@ namespace Lyra
             SongPresenterViewModel.IsPresentationActive = true;
         }
 
-        public void Activate()
+        public void Initialize()
         {
+            Styles.Clear();
+            foreach (var style in styleRepository.GetStyles().Select(s => new PresentationStyleViewModel(s)))
+            {
+                Styles.Add(style);
+            }
+
             var songs = songRepository.GetSongs();
             Songs.Clear();
-            foreach (var songViewModel in songs.Select(s => new SongViewModel(s)))
+
+            foreach (var songViewModel in songs.Select(s => new SongViewModel(s, this)))
             {
                 Songs.Add(songViewModel);
             }
@@ -124,7 +172,7 @@ namespace Lyra
                 SongTags.Add(tag);
             }
 
-            this.WhenValueChanged(x => x.SearchText, false)
+            this.WhenAnyValue(x => x.SearchText)
                 .Throttle(TimeSpan.FromSeconds(0.8), RxApp.TaskpoolScheduler)
                 .Select(query => query?.Trim())
                 .DistinctUntilChanged()
@@ -134,10 +182,11 @@ namespace Lyra
                     ExecuteSearchAndRefresh();
                 });
 
-            this.WhenValueChanged(x => x.SearchItems, false).Subscribe(_ =>
-            {
-                ExecuteSearchAndRefresh();
-            });
+            this.WhenAnyValue(x => x.SearchItems)
+                .Subscribe(_ =>
+                {
+                    ExecuteSearchAndRefresh();
+                });
         }
 
         private void ExecuteSearchAndRefresh()
