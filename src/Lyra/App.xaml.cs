@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Threading;
@@ -13,10 +14,14 @@ using Lyra.Features.Songs;
 using Lyra.Features.Styles;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using Serilog;
 using Syncfusion.Licensing;
 using Syncfusion.SfSkinManager;
 using Syncfusion.Themes.FluentLight.WPF;
+using Color = System.Windows.Media.Color;
+using ColorConverter = System.Windows.Media.ColorConverter;
+using FontFamily = System.Windows.Media.FontFamily;
 
 namespace Lyra
 {
@@ -25,45 +30,64 @@ namespace Lyra
     /// </summary>
     public partial class App : Application
     {
-        public ServiceProvider ServiceProvider { get; }
+        public IHost Host { get; }
 
-        public IConfiguration Configuration { get; }
-
-        public App(Action<IServiceCollection> configureServices = null)
+        public App(
+            Action<IServiceCollection, IConfiguration> configureServices = null,
+            IReadOnlyCollection<string> additionalJsonFiles = null)
         {
+            this.DispatcherUnhandledException += OnDispatcherUnhandledException;
+            Startup += OnStartupAsync;
+            Exit += OnExitAsync;
+
+            SyncfusionLicenseProvider.RegisterLicense(
+                "NDM1MDY1QDMxMzkyZTMxMmUzMGRmSWo1MkdMczNsdStibjd2RlphdHNqV002S0ttb0RITU8ra1pRU3FXR3c9");
+
             var splashScreen = new SplashScreen(GetType().Assembly, "Resources/splash.png");
             splashScreen.Show(true, true);
 
-            SyncfusionLicenseProvider.RegisterLicense("NDM1MDY1QDMxMzkyZTMxMmUzMGRmSWo1MkdMczNsdStibjd2RlphdHNqV002S0ttb0RITU8ra1pRU3FXR3c9");
-            Configuration = BuildConfiguration();
-            InitializeTheme();
-            Log.Logger = new LoggerConfiguration()
-                .ReadFrom.Configuration(Configuration)
-                .CreateLogger();
+            Host = new HostBuilder()
+                .ConfigureAppConfiguration((context, configurationBuilder) =>
+                {
+                    configurationBuilder
+                        .SetBasePath(context.HostingEnvironment.ContentRootPath)
+                        .SetBasePath(Directory.GetCurrentDirectory())
+                        .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
+                        .AddJsonFile("appsettings.logger.json", optional: false, reloadOnChange: true)
+                        .AddAdditionalJsonFiles(additionalJsonFiles)
+                        .AddJsonFile("appsettings.user.json", optional: true, reloadOnChange: true)
+                        .AddEnvironmentVariables("Lyra_")
+                        .AddCommandLine(Environment.GetCommandLineArgs());
+                }).ConfigureLogging((context, logging) =>
+                {
+                    Log.Logger = new LoggerConfiguration()
+                        .ReadFrom.Configuration(context.Configuration)
+                        .CreateLogger();
 
-            var services = new ServiceCollection();
-            services.AddLogging(configure =>
-            {
-                configure.AddSerilog(dispose: true);
-            });
+                    logging.AddSerilog(dispose: true);
+                })
+                .ConfigureServices((context, services) =>
+                {
+                    InitializeTheme(context.Configuration);
 
-            ConfigureServices(services);
-            configureServices?.Invoke(services);
-            ServiceProvider = services.BuildServiceProvider();
-
-            this.DispatcherUnhandledException += OnDispatcherUnhandledException;
+                    ConfigureServices(services, context.Configuration);
+                    configureServices?.Invoke(services, context.Configuration);
+                })
+                .Build();
         }
 
-        private void InitializeTheme()
+        private void InitializeTheme(IConfiguration configuration)
         {
-            var lyraOptions = Configuration.GetSection("Lyra").Get<LyraOptions>();
-            var themeOptions = Configuration.GetSection("Theme").Get<ThemeOptions>();
+            var lyraOptions = configuration.GetSection("Lyra").Get<LyraOptions>();
+            var themeOptions = configuration.GetSection("Theme").Get<ThemeOptions>();
             SfSkinManager.ApplyStylesOnApplication = true;
-            var primaryBrush = new SolidColorBrush((Color)ColorConverter.ConvertFromString(themeOptions.PrimaryBackground));
+            var primaryBrush =
+                new SolidColorBrush((Color)ColorConverter.ConvertFromString(themeOptions.PrimaryBackground));
             var themeSettings = new FluentLightThemeSettings
             {
                 PrimaryBackground = primaryBrush,
-                PrimaryForeground = new SolidColorBrush((Color)ColorConverter.ConvertFromString(themeOptions.PrimaryForeground)),
+                PrimaryForeground =
+                    new SolidColorBrush((Color)ColorConverter.ConvertFromString(themeOptions.PrimaryForeground)),
                 HeaderFontSize = themeOptions.HeaderFontSize,
                 SubHeaderFontSize = themeOptions.SubHeaderFontSize,
                 TitleFontSize = themeOptions.TitleFontSize,
@@ -87,45 +111,37 @@ namespace Lyra
             SfSkinManager.RegisterThemeSettings("FluentLight", themeSettings);
         }
 
-        private static IConfiguration BuildConfiguration()
-            => new ConfigurationBuilder()
-                .SetBasePath(Directory.GetCurrentDirectory())
-                .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
-                .AddJsonFile("appsettings.logger.json", optional: false, reloadOnChange: true)
-                .AddJsonFile("appsettings.console.json", optional: true, reloadOnChange: true)
-                .AddJsonFile("appsettings.user.json", optional: true, reloadOnChange: true)
-                .AddEnvironmentVariables("Lyra_")
-                .AddCommandLine(Environment.GetCommandLineArgs())
-                .Build();
-
-        private void ConfigureServices(ServiceCollection services)
+        private void ConfigureServices(IServiceCollection services, IConfiguration configuration)
         {
-            services.AddUI(Configuration);
-            services.AddDatabase(Configuration);
-            services.AddConfig(Configuration);
+            services.AddUI(configuration);
+            services.AddDatabase(configuration);
+            services.AddConfig(configuration);
 
-            services.AddSong(Configuration);
-            services.AddPresentationStyle(Configuration);
-            services.AddSessionTracking(Configuration);
-            services.AddSearch(Configuration);
+            services.AddSong(configuration);
+            services.AddPresentationStyle(configuration);
+            services.AddSessionTracking(configuration);
+            services.AddSearch(configuration);
         }
 
-        protected override void OnStartup(StartupEventArgs e)
+        private async void OnStartupAsync(object sender, StartupEventArgs e)
         {
-            var mainWindow = ServiceProvider.GetRequiredService<MainWindow>();
-            mainWindow.ViewModel = ServiceProvider.GetRequiredService<MainWindowViewModel>();
-            mainWindow.Show();
+            await Host.StartAsync();
 
-            base.OnStartup(e);
+            var mainWindow = Host.Services.GetRequiredService<MainWindow>();
+            mainWindow.ViewModel = Host.Services.GetRequiredService<MainWindowViewModel>();
+            mainWindow.Show();
+        }
+
+        private async void OnExitAsync(object sender, ExitEventArgs e)
+        {
+            using (Host)
+            {
+                Log.CloseAndFlush();
+                await Host.StopAsync();
+            }
         }
 
         private static void OnDispatcherUnhandledException(object sender, DispatcherUnhandledExceptionEventArgs e)
             => Log.Logger.Fatal(e.Exception, "Unhandled exception.");
-
-        protected override void OnExit(ExitEventArgs e)
-        {
-            base.OnExit(e);
-            Log.CloseAndFlush();
-        }
     }
 }

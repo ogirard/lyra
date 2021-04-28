@@ -4,6 +4,7 @@ using System.Linq;
 using Lyra.Console.Migration.LegacyModel;
 using Lyra.Features.Songs;
 using Lyra.Features.Styles;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
@@ -12,16 +13,35 @@ namespace Lyra.Console.Migration
     public class Migrator
     {
         private readonly ILogger<Migrator> logger;
+        private readonly IConfiguration configuration;
         private readonly DatabaseOptions databaseOptions;
         private readonly ISongRepository songRepository;
         private readonly IStyleRepository styleRepository;
 
-        public Migrator(ILogger<Migrator> logger, IOptionsMonitor<DatabaseOptions> dataOptions, ISongRepository songRepository, IStyleRepository styleRepository)
+        public Migrator(ILogger<Migrator> logger, IConfiguration configuration, IOptionsMonitor<DatabaseOptions> dataOptions, ISongRepository songRepository, IStyleRepository styleRepository)
         {
             this.logger = logger;
+            this.configuration = configuration;
             this.databaseOptions = dataOptions.CurrentValue;
             this.songRepository = songRepository;
             this.styleRepository = styleRepository;
+        }
+
+        public void Cleanup()
+        {
+            var dbPath = new FileInfo(databaseOptions.ConnectionString.Replace("Filename=", string.Empty).Replace("%APPDATA%", Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData)));
+            if (dbPath.Exists)
+            {
+                dbPath.Delete();
+                logger.LogInformation($"Deleted {dbPath.FullName}");
+
+                var dbLogPath = new FileInfo(dbPath.FullName.Replace(".db", "-log.db"));
+                if (dbLogPath.Exists)
+                {
+                    dbLogPath.Delete();
+                    logger.LogInformation($"Deleted {dbLogPath.FullName}");
+                }
+            }
         }
 
         public LegacySongStore InitializeLegacyStore()

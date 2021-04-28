@@ -1,9 +1,7 @@
 using System;
-using System.IO;
 using Lyra.Console.Migration;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Serilog;
 using Serilog.Debugging;
 using static System.Console;
 
@@ -23,34 +21,24 @@ namespace Lyra.Console
                 ForegroundColor = currentColor;
             });
 
-            var app = new App(s =>
-            {
-                s.AddSingleton<Migrator>();
-            });
+            var app = new App(
+                (services, config) =>
+                {
+                    services.AddSingleton<Migrator>();
+                },
+                new[] { "appsettings.console.json" });
 
-            app.InitializeComponent();
-
-            var runCleanMigration = app.Configuration.GetValue<bool>("Migration:RunCleanMigration");
+            // Migrate
+            var migrator = app.Host.Services.GetRequiredService<Migrator>();
+            var configuration = app.Host.Services.GetRequiredService<IConfiguration>();
+            var runCleanMigration = configuration.GetValue<bool>("Migration:RunCleanMigration");
             if (runCleanMigration)
             {
-                var dbPath = new FileInfo(app.Configuration.GetValue<string>("Database:ConnectionString").Replace("Filename=", string.Empty).Replace("%APPDATA%", Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData)));
-                if (dbPath.Exists)
-                {
-                    dbPath.Delete();
-                    Log.Logger.Information($"Deleted {dbPath.FullName}");
-
-                    var dbLogPath = new FileInfo(dbPath.FullName.Replace(".db", "-log.db"));
-                    if (dbLogPath.Exists)
-                    {
-                        dbLogPath.Delete();
-                        Log.Logger.Information($"Deleted {dbLogPath.FullName}");
-                    }
-                }
-
-                var migrator = app.ServiceProvider.GetRequiredService<Migrator>();
+                migrator.Cleanup();
                 var legacyStore = migrator.InitializeLegacyStore();
             }
 
+            app.InitializeComponent();
             app.Run();
         }
     }
