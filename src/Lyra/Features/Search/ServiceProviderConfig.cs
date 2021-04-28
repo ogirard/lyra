@@ -7,7 +7,9 @@ namespace Lyra.Features.Search
     {
         public static IServiceCollection AddSearch(this IServiceCollection services, IConfiguration configuration)
         {
-            services.AddTransient<ISearchService, SimpleSearchService>();
+            services.AddTransient<ISearchService, IndexSearchService>();
+            services.AddSingleton<SearchIndex>();
+            services.AddHostedService(sp => sp.GetRequiredService<SearchIndex>());
             return services;
         }
     }

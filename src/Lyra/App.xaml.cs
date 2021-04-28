@@ -1,7 +1,6 @@
 using System;
-using System.Collections.Generic;
 using System.Globalization;
-using System.IO;
+using System.Reflection;
 using System.Threading;
 using System.Windows;
 using System.Windows.Markup;
@@ -12,6 +11,7 @@ using Lyra.Features.Search;
 using Lyra.Features.SessionTracking;
 using Lyra.Features.Songs;
 using Lyra.Features.Styles;
+using MediatR;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -32,9 +32,12 @@ namespace Lyra
     {
         public IHost Host { get; }
 
-        public App(
-            Action<IServiceCollection, IConfiguration> configureServices = null,
-            IReadOnlyCollection<string> additionalJsonFiles = null)
+        public App()
+            : this(null, null)
+        {
+        }
+
+        public App(IConfiguration configuration, Action<IServiceCollection> configureServices)
         {
             this.DispatcherUnhandledException += OnDispatcherUnhandledException;
             Startup += OnStartupAsync;
@@ -49,12 +52,16 @@ namespace Lyra
             Host = new HostBuilder()
                 .ConfigureAppConfiguration((context, configurationBuilder) =>
                 {
+                    if (configuration != null)
+                    {
+                        configurationBuilder.AddConfiguration(configuration);
+                        return;
+                    }
+
                     configurationBuilder
                         .SetBasePath(context.HostingEnvironment.ContentRootPath)
-                        .SetBasePath(Directory.GetCurrentDirectory())
                         .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
                         .AddJsonFile("appsettings.logger.json", optional: false, reloadOnChange: true)
-                        .AddAdditionalJsonFiles(additionalJsonFiles)
                         .AddJsonFile("appsettings.user.json", optional: true, reloadOnChange: true)
                         .AddEnvironmentVariables("Lyra_")
                         .AddCommandLine(Environment.GetCommandLineArgs());
@@ -71,7 +78,7 @@ namespace Lyra
                     InitializeTheme(context.Configuration);
 
                     ConfigureServices(services, context.Configuration);
-                    configureServices?.Invoke(services, context.Configuration);
+                    configureServices?.Invoke(services);
                 })
                 .Build();
         }
@@ -113,14 +120,16 @@ namespace Lyra
 
         private void ConfigureServices(IServiceCollection services, IConfiguration configuration)
         {
-            services.AddUI(configuration);
-            services.AddDatabase(configuration);
+            services.AddMediatR(typeof(App).GetTypeInfo().Assembly);
             services.AddConfig(configuration);
+            services.AddDatabase(configuration);
 
             services.AddSong(configuration);
             services.AddPresentationStyle(configuration);
             services.AddSessionTracking(configuration);
             services.AddSearch(configuration);
+
+            services.AddUI(configuration);
         }
 
         private async void OnStartupAsync(object sender, StartupEventArgs e)

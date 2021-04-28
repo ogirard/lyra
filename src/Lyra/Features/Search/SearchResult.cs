@@ -9,6 +9,6 @@ namespace Lyra.Features.Search
 
         public bool IsMatch { get; set; }
 
-        public decimal Rank { get; set; }
+        public float Score { get; set; }
     }
 }

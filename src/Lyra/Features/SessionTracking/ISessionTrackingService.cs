@@ -6,6 +6,6 @@ namespace Lyra.Features.SessionTracking
     {
         void LogStartPresentation(Song song);
 
-        void LogEndPresentation(Song song);
+        void LogEndPresentation();
     }
 }

@@ -21,16 +21,19 @@ namespace Lyra.Features.SessionTracking
         public void LogStartPresentation(Song song)
             => LogMetric(StartPresentationKey, song);
 
-        public void LogEndPresentation(Song song)
-            => LogMetric(EndPresentationKey, song);
+        public void LogEndPresentation()
+            => LogMetric(EndPresentationKey);
 
-        private void LogMetric(string metricName, Song song)
+        private void LogMetric(string metricName, Song song = null)
         {
             var metric = new SessionTrackingMetric { Metric = metricName };
-            metric.Tags.Add("Song", song);
+            if (song != null)
+            {
+                metric.Tags.Add("Song", song);
+            }
 
             dbRepository.Insert(metric, collectionName: metricName);
-            logger.LogTrace($"Logged session metric: {metricName} for song '{song.Id}'");
+            logger.LogTrace($"Logged session metric: {metricName}{(song == null ? string.Empty : $" for song {song.Id}")}'");
         }
     }
 }

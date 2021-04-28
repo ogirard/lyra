@@ -7,6 +7,7 @@ using Lyra.Features.Styles;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using Serilog.Core;
 
 namespace Lyra.Console.Migration
 {
@@ -27,19 +28,19 @@ namespace Lyra.Console.Migration
             this.styleRepository = styleRepository;
         }
 
-        public void Cleanup()
+        public static void Cleanup(string dbPath, Serilog.ILogger logger)
         {
-            var dbPath = new FileInfo(databaseOptions.ConnectionString.Replace("Filename=", string.Empty).Replace("%APPDATA%", Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData)));
-            if (dbPath.Exists)
+            var dbFile = new FileInfo(dbPath);
+            if (dbFile.Exists)
             {
-                dbPath.Delete();
-                logger.LogInformation($"Deleted {dbPath.FullName}");
+                dbFile.Delete();
+                logger.Information($"Deleted {dbFile.FullName}");
 
-                var dbLogPath = new FileInfo(dbPath.FullName.Replace(".db", "-log.db"));
+                var dbLogPath = new FileInfo(dbFile.FullName.Replace(".db", "-log.db"));
                 if (dbLogPath.Exists)
                 {
                     dbLogPath.Delete();
-                    logger.LogInformation($"Deleted {dbLogPath.FullName}");
+                    logger.Information($"Deleted {dbLogPath.FullName}");
                 }
             }
         }

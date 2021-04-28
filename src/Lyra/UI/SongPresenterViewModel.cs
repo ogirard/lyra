@@ -1,5 +1,6 @@
+using System;
 using System.Windows.Input;
-using Lyra.Features.Songs;
+using Lyra.Features.SessionTracking;
 using Microsoft.Extensions.Logging;
 using ReactiveUI;
 
@@ -11,9 +12,30 @@ namespace Lyra.UI
         private SongViewModel presentedSong;
         private bool isPresentationActive;
 
-        public SongPresenterViewModel(ILogger<SongPresenterViewModel> logger)
+        public SongPresenterViewModel(ILogger<SongPresenterViewModel> logger, ISessionTrackingService sessionTrackingService)
         {
             this.logger = logger;
+            this.WhenAnyValue(x => x.PresentedSong)
+                .Subscribe(
+                x =>
+                {
+                    if (x != null && isPresentationActive)
+                    {
+                        sessionTrackingService.LogStartPresentation(x.Song);
+                    }
+                });
+
+            this.WhenAnyValue(x => x.IsPresentationActive).Subscribe(x =>
+            {
+                if (x)
+                {
+                    sessionTrackingService.LogStartPresentation(PresentedSong.Song);
+                }
+                else
+                {
+                    sessionTrackingService.LogEndPresentation();
+                }
+            });
         }
 
         public SongViewModel PresentedSong

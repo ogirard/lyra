@@ -5,7 +5,6 @@ using System.ComponentModel;
 using System.Linq;
 using System.Reactive.Linq;
 using System.Windows.Data;
-using System.Windows.Forms.VisualStyles;
 using System.Windows.Input;
 using Lyra.Features.Search;
 using Lyra.Features.Songs;
@@ -24,6 +23,7 @@ namespace Lyra
         private readonly ISearchService searchService;
         private readonly IStyleRepository styleRepository;
 
+        private readonly ICollectionView songsView;
         private ObservableCollection<SongViewModel> songs;
         private ObservableCollection<string> songTags;
         private ObservableCollection<PresentationStyleViewModel> styles;
@@ -45,14 +45,10 @@ namespace Lyra
         {
             get
             {
-                var view = CollectionViewSource.GetDefaultView(Songs);
-                view.Filter = FilterSong;
-                view.SortDescriptions.Add(new SortDescription("Rank", ListSortDirection.Ascending));
-                view.SortDescriptions.Add(new SortDescription("Number", ListSortDirection.Ascending));
                 SongListInfo = searchResults.Count == songs.Count
                     ? $"Alle {songs.Count} Lieder"
                     : $"{searchResults.Count} von {songs.Count} Lieder";
-                return view;
+                return songsView;
             }
         }
 
@@ -122,6 +118,10 @@ namespace Lyra
             this.styleRepository = styleRepository;
 
             Songs = new ObservableCollection<SongViewModel>();
+            songsView = CollectionViewSource.GetDefaultView(Songs);
+            songsView.Filter = FilterSong;
+            songsView.SortDescriptions.Add(new SortDescription(nameof(SongViewModel.Score), ListSortDirection.Descending));
+            songsView.SortDescriptions.Add(new SortDescription(nameof(SongViewModel.Number), ListSortDirection.Ascending));
             SongTags = new ObservableCollection<string>();
             Styles = new ObservableCollection<PresentationStyleViewModel>();
             PresentSongCommand = ReactiveCommand.Create(PresentSong, this.WhenAnyValue(x => x.SelectedSong).Select(x => x != null));
@@ -192,9 +192,11 @@ namespace Lyra
         private void ExecuteSearchAndRefresh()
         {
             searchResults = this.searchService
-                .Search(searchText, searchItems?.Cast<string>(), songRepository.GetSongs())
+                .Search(searchText, searchItems?.Cast<string>().ToList(), songRepository.GetSongs())
                 .Where(x => x.IsMatch)
                 .ToDictionary(x => x.Song.Id, x => x);
+
+            Songs.ForEach(s => s.Score = searchResults.ContainsKey(s.Id) ? searchResults[s.Id].Score : 0f);
 
             SongsView.Refresh();
         }

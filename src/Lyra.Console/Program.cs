@@ -1,4 +1,5 @@
 using System;
+using System.IO;
 using Lyra.Console.Migration;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -20,22 +21,38 @@ namespace Lyra.Console
                 WriteLine($"SERILOG> {msg}");
                 ForegroundColor = currentColor;
             });
+            var configuration = new ConfigurationBuilder()
+                .SetBasePath(Directory.GetCurrentDirectory())
+                .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
+                .AddJsonFile("appsettings.logger.json", optional: false, reloadOnChange: true)
+                .AddJsonFile("appsettings.console.json", optional: false, reloadOnChange: true)
+                .AddJsonFile("appsettings.user.json", optional: true, reloadOnChange: true)
+                .AddEnvironmentVariables("Lyra_")
+                .AddCommandLine(Environment.GetCommandLineArgs())
+                .Build();
 
-            var app = new App(
-                (services, config) =>
-                {
-                    services.AddSingleton<Migrator>();
-                },
-                new[] { "appsettings.console.json" });
-
-            // Migrate
-            var migrator = app.Host.Services.GetRequiredService<Migrator>();
-            var configuration = app.Host.Services.GetRequiredService<IConfiguration>();
+            var dbPath = configuration
+                .GetValue<string>("Database:ConnectionString")
+                .Replace("Filename=", string.Empty)
+                .Replace("%APPDATA%", Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData));
             var runCleanMigration = configuration.GetValue<bool>("Migration:RunCleanMigration");
             if (runCleanMigration)
             {
-                migrator.Cleanup();
-                var legacyStore = migrator.InitializeLegacyStore();
+                Migrator.Cleanup(dbPath, Serilog.Log.Logger);
+            }
+
+            var app = new App(
+                configuration,
+                services =>
+                {
+                    services.AddSingleton<Migrator>();
+                });
+
+            // Migrate
+            if (runCleanMigration)
+            {
+                var migrator = app.Host.Services.GetRequiredService<Migrator>();
+                migrator.InitializeLegacyStore();
             }
 
             app.InitializeComponent();

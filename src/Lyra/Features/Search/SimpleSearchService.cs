@@ -7,7 +7,7 @@ namespace Lyra.Features.Search
 {
     public class SimpleSearchService : ISearchService
     {
-        public IReadOnlyList<SearchResult> Search(string query, IEnumerable<string> tags, IEnumerable<Song> songs)
+        public IReadOnlyList<SearchResult> Search(string query, IReadOnlyCollection<string> tags, IEnumerable<Song> songs)
         {
             var tagList = tags?.ToList() ?? new List<string>();
             return songs.Select(s => FilterSong(query, tagList, s)).ToList();
@@ -26,11 +26,11 @@ namespace Lyra.Features.Search
                     || song.Title.ToLowerInvariant().Contains(normalizedQuery)
                     || song.Text.ToLowerInvariant().Contains(normalizedQuery))
                 {
-                    return new SearchResult { IsMatch = true, Rank = 1m, Song = song };
+                    return new SearchResult { IsMatch = true, Score = 1f, Song = song };
                 }
             }
 
-            return new SearchResult { IsMatch = false, Rank = 0m, Song = song };
+            return new SearchResult { IsMatch = false, Score = 0f, Song = song };
         }
     }
 }

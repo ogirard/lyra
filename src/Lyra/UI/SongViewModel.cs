@@ -6,31 +6,32 @@ namespace Lyra.UI
 {
     public class SongViewModel : ReactiveObject
     {
-        private readonly Song song;
         private readonly MainWindowViewModel root;
-        private decimal rank;
+        private float score;
 
-        public string Id => song.Id;
+        public string Id => Song.Id;
 
-        public decimal Rank
+        public float Score
         {
-            get => rank;
-            set => this.RaiseAndSetIfChanged(ref rank, value);
+            get => score;
+            set => this.RaiseAndSetIfChanged(ref score, value);
         }
 
-        public int Number => song.Number;
+        public int Number => Song.Number;
 
-        public string Title => song.Title;
+        public string Title => Song.Title;
 
-        public string Text => song.Text;
+        public string Text => Song.Text;
 
-        public string ToolTip => $"{song.Number} - {song.Title}";
+        public string ToolTip => $"{Song.Number} - {Song.Title}";
+
+        public Song Song { get; }
 
         public PresentationStyleViewModel PresentationStyle { get; }
 
         public SongViewModel(Song song, MainWindowViewModel root)
         {
-            this.song = song;
+            this.Song = song;
             this.root = root;
             this.PresentationStyle = root.Styles.FirstOrDefault(s => s.Id == song.StyleId);
         }
