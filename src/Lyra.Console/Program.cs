@@ -1,5 +1,8 @@
 using System;
+using System.Data.Common;
+using System.Diagnostics;
 using System.IO;
+using LiteDB;
 using Lyra.Console.Migration;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -31,14 +34,15 @@ namespace Lyra.Console
                 .AddCommandLine(Environment.GetCommandLineArgs())
                 .Build();
 
-            var dbPath = configuration
-                .GetValue<string>("Database:ConnectionString")
-                .Replace("Filename=", string.Empty)
-                .Replace("%APPDATA%", Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData));
+            var dbConnectionString = new ConnectionString(
+                configuration
+                    .GetValue<string>("Database:ConnectionString")
+                    .Replace("%APPDATA%", Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData)));
+
             var runCleanMigration = configuration.GetValue<bool>("Migration:RunCleanMigration");
             if (runCleanMigration)
             {
-                Migrator.Cleanup(dbPath, Serilog.Log.Logger);
+                Migrator.Cleanup(dbConnectionString.Filename, Serilog.Log.Logger);
             }
 
             var app = new App(

@@ -9,8 +9,8 @@
     xmlns:syncfusionShared="clr-namespace:Syncfusion.Windows.Shared;assembly=Syncfusion.Shared.WPF"
     xmlns:ui="clr-namespace:Lyra.UI"
     Title=""
-    Width="1200"
-    Height="800"
+    Width="1300"
+    Height="1024"
     d:DataContext="{d:DesignInstance local:MainWindowViewModel}"
     Icon="Resources/logo-32.png"
     ShowIcon="False"
@@ -211,15 +211,72 @@
                     <RowDefinition Height="Auto" />
                     <RowDefinition Height="*" />
                 </Grid.RowDefinitions>
-                <StackPanel Grid.Row="0" Orientation="Horizontal">
-                    <TextBlock Margin="5" Text="{Binding SelectedSong.Number}" />
-                    <TextBlock Margin="5" Text="{Binding SelectedSong.Title}" />
+                <StackPanel
+                    Grid.Row="0"
+                    Background="{StaticResource PrimaryBrush}"
+                    Orientation="Horizontal">
+                    <TextBlock
+                        Margin="5"
+                        FontSize="14"
+                        Foreground="White"
+                        Text="{Binding SelectedSong.Number}" />
+                    <TextBlock
+                        Margin="5"
+                        FontSize="14"
+                        FontWeight="SemiBold"
+                        Foreground="White"
+                        Text="{Binding SelectedSong.Title}" />
                 </StackPanel>
 
-                <TextBlock
-                    Grid.Row="1"
-                    Margin="5"
-                    Text="{Binding SelectedSong.Text}" />
+                <ui:PreviewSongDocument Grid.Row="1" Song="{Binding SelectedSong}" />
+
+                <!--<FlowDocumentReader Grid.Row="1">
+                    <FlowDocumentReader.Document>
+                        <FlowDocument>
+                            <FlowDocument.Resources>
+                                <Style x:Key="RefrainStyle" TargetType="{x:Type Run}">
+                                    <Setter Property="FontWeight" Value="Semibold" />
+                                </Style>
+                            </FlowDocument.Resources>
+                            <Section xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation">
+                                <Paragraph Name="Anfang">
+                                    <LineBreak /><Run Style="{DynamicResource RefrainStyle}">
+                                        Herr, du gibst uns Hoffnung, du änderst unser Leben.
+                                        Grosses wird gross, Kleines wird klein.
+                                        Du willst uns gestalten, uns Geist und Leben geben.
+                                        Herr, wir brauchen dich! Du lässt uns nicht allein.
+                                    </Run><LineBreak /><LineBreak />
+                                    Du weisst, wie oft wir mutlos sind,
+                                    wie die Angst gewinnt
+                                    und uns jede Hoffnung nehmen will.
+                                    Doch deine Liebe ist so gross
+                                    und lässt uns nicht los.
+                                    Bei dir werden alle Ängste still.</Paragraph>
+                                <Paragraph Name="Strophe2">
+                                    Wir sind gefangen in der Welt,
+                                    halten was nicht hält und begreifen nicht,
+                                    wie gross du bist;
+                                    dass du dich Herr und König nennst,
+                                    und dass du uns kennst,
+                                    dass dein Plan für uns schon fertig ist.
+                                </Paragraph>
+                                <Paragraph Name="Strophe3Refrain" ToolTip="Strophe 3 &amp; Refrain">
+                                    Wie oft verträumen wir die Zeit
+                                    und sind nicht bereit,
+                                    als Gesandte in die Welt zu gehn.
+                                    Herr, der du deine Kraft verheisst:
+                                    Füll uns mit dem Geist,
+                                    lass ihn neu durch unser Leben wehn.<LineBreak /><Run Style="{DynamicResource RefrainStyle}">
+                                        Herr, du gibst uns Hoffnung, du änderst unser Leben.
+                                        Grosses wird gross, Kleines wird klein.
+                                        Du willst uns gestalten, uns Geist und Leben geben.
+                                        Herr, wir brauchen dich! Du lässt uns nicht allein.
+                                    </Run><LineBreak /><LineBreak />
+                                </Paragraph>
+                            </Section>
+                        </FlowDocument>
+                    </FlowDocumentReader.Document>
+                </FlowDocumentReader>-->
             </Grid>
 
         </Border>

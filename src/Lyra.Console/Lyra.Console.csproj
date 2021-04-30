@@ -33,6 +33,9 @@
     <None Update="Migration\Data\lyrastyles.xml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Update="Tools\LiteDB.Studio.exe">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 
 </Project>

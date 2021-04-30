@@ -160,6 +160,7 @@ namespace Lyra
 
             var songs = songRepository.GetSongs();
             Songs.Clear();
+            //// LogTagsInUse(songs);
 
             foreach (var songViewModel in songs.Select(s => new SongViewModel(s, this)))
             {
@@ -187,6 +188,45 @@ namespace Lyra
                 {
                     ExecuteSearchAndRefresh();
                 });
+        }
+
+        private void LogTagsInUse(IReadOnlyCollection<Song> songs)
+        {
+            var tags = new Dictionary<string, List<string>>();
+            foreach (var song in songs)
+            {
+                var tagOpen = false;
+                var tag = string.Empty;
+                foreach (var c in song.Text)
+                {
+                    if (c == '<')
+                    {
+                        tagOpen = true;
+                    }
+                    else if (c == '>')
+                    {
+                        tagOpen = false;
+                        tag = tag.ToLowerInvariant().Split(' ', StringSplitOptions.RemoveEmptyEntries).First();
+                        if (!tag.StartsWith('/'))
+                        {
+                            if (!tags.ContainsKey(tag))
+                            {
+                                tags.Add(tag, new List<string>());
+                            }
+
+                            tags[tag].Add(song.Id);
+                        }
+
+                        tag = string.Empty;
+                    }
+                    else if (tagOpen)
+                    {
+                        tag += c;
+                    }
+                }
+            }
+
+            logger.LogInformation($"Tags in use: {string.Join($"{Environment.NewLine}  - ", tags.Select(t => $"{t.Key}: {t.Value.Count} usages, songs {string.Join(',', t.Value.Select(x => x))}"))}");
         }
 
         private void ExecuteSearchAndRefresh()

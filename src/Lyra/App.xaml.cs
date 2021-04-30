@@ -101,7 +101,7 @@ namespace Lyra
                 SubTitleFontSize = themeOptions.SubTitleFontSize,
                 BodyFontSize = themeOptions.BodyFontSize,
                 BodyAltFontSize = themeOptions.BodyAltFontSize,
-                FontFamily = new FontFamily("Segoe UI"),
+                FontFamily = new FontFamily("Roboto"),
                 ListAccentMedium = primaryBrush,
                 SystemAccentColor = primaryBrush,
                 ListAccentLow = primaryBrush,
