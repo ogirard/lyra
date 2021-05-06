@@ -36,7 +36,7 @@ namespace Lyra.Console
 
             var dbConnectionString = new ConnectionString(
                 configuration
-                    .GetValue<string>("Database:ConnectionString")
+                    .GetValue<string>("Lyra:DatabaseConnectionString")
                     .Replace("%APPDATA%", Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData)));
 
             var runCleanMigration = configuration.GetValue<bool>("Migration:RunCleanMigration");

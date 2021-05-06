@@ -1,5 +1,6 @@
 using System.Linq;
 using Lyra.Features.Songs;
+using MediatR;
 using ReactiveUI;
 
 namespace Lyra.UI
@@ -7,6 +8,7 @@ namespace Lyra.UI
     public class SongViewModel : ReactiveObject
     {
         private readonly MainWindowViewModel root;
+        private readonly IMediator mediator;
         private float score;
 
         public string Id => Song.Id;
@@ -29,10 +31,14 @@ namespace Lyra.UI
 
         public PresentationStyleViewModel PresentationStyle { get; }
 
-        public SongViewModel(Song song, MainWindowViewModel root)
+        public void ActivateJumpmark(string name)
+            => mediator.Publish(new JumpmarkActivated { Name = name, SongId = Song.Id });
+
+        public SongViewModel(Song song, MainWindowViewModel root, IMediator mediator)
         {
             this.Song = song;
             this.root = root;
+            this.mediator = mediator;
             this.PresentationStyle = root.Styles.FirstOrDefault(s => s.Id == song.StyleId);
         }
     }

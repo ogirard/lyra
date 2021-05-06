@@ -1,9 +1,14 @@
 <ResourceDictionary
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:ui="clr-namespace:Lyra.UI">
+    <Color x:Key="PrimaryColor">#B76BAB</Color>
     <SolidColorBrush x:Key="PrimaryBrush">#B76BAB</SolidColorBrush>
+    <Color x:Key="PrimaryColorFaded">#AAB76BAB</Color>
+    <SolidColorBrush x:Key="PrimaryBrushFaded">#AAB76BAB</SolidColorBrush>
     <SolidColorBrush x:Key="PrimaryDarkBrush">#5B3656</SolidColorBrush>
     <SolidColorBrush x:Key="SecondaryBrush">#758CC2</SolidColorBrush>
     <FontFamily x:Key="PrimaryFont">Roboto</FontFamily>
     <FontFamily x:Key="PrimaryMonoFont">Cascadia Code PL</FontFamily>
+    <ui:NullVisibilityConverter x:Key="NullToVisibilityConverter" />
 </ResourceDictionary>

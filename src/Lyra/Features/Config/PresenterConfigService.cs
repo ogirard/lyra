@@ -21,8 +21,9 @@ namespace Lyra.Features.Config
 
         public IReadOnlyCollection<PresenterScreen> GetScreens()
         {
-            return Screen.AllScreens.Select(s => new PresenterScreen
+            return Screen.AllScreens.Select((s, id) => new PresenterScreen
             {
+                ScreenId = id,
                 DeviceName = s.DeviceName,
                 Bounds = s.Bounds,
                 IsPrimary = s.Primary,

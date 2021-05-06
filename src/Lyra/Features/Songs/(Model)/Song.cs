@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using LiteDB;
 
 namespace Lyra.Features.Songs
 {
@@ -15,5 +16,8 @@ namespace Lyra.Features.Songs
         public string StyleId { get; set; }
 
         public List<string> Tags { get; set; } = new();
+
+        [BsonIgnore]
+        public string DisplayText => $"{Number} - {Title} (id: {Id})";
     }
 }

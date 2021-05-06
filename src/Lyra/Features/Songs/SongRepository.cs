@@ -29,7 +29,7 @@ namespace Lyra.Features.Songs
         public void AddSong(Song song)
         {
             dbRepository.Insert(song);
-            logger.LogTrace($"Added '{song.Id}' to '{songCollectionName}' collection");
+            logger.LogTrace($"Added '{song.DisplayText}' to '{songCollectionName}' collection");
         }
 
         public void RemoveSong(Song song)

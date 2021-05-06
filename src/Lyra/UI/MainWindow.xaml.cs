@@ -1,13 +1,11 @@
 using System;
-using System.Reactive.Linq;
 using System.Windows;
 using System.Windows.Input;
 using DynamicData.Binding;
-using Lyra.UI;
 using Syncfusion.SfSkinManager;
 using Syncfusion.Windows.Shared;
 
-namespace Lyra
+namespace Lyra.UI
 {
     /// <summary>
     /// Interaction logic for MainWindow.xaml
@@ -51,9 +49,9 @@ namespace Lyra
 
         private void OnMouseDoubleClickListView(object sender, MouseButtonEventArgs e)
         {
-            if (e.ChangedButton == MouseButton.Left && ViewModel.PresentSongCommand.CanExecute(null))
+            if (e.ChangedButton == MouseButton.Left && ViewModel.StartPresentationFromSelectedSongCommand.CanExecute(null))
             {
-                ViewModel.PresentSongCommand.Execute(null);
+                ViewModel.StartPresentationFromSelectedSongCommand.Execute(null);
             }
         }
     }

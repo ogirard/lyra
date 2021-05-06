@@ -1,9 +1,8 @@
 <syncfusion:ChromelessWindow
-    x:Class="Lyra.MainWindow"
+    x:Class="Lyra.UI.MainWindow"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-    xmlns:local="clr-namespace:Lyra"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:syncfusion="http://schemas.syncfusion.com/wpf"
     xmlns:syncfusionShared="clr-namespace:Syncfusion.Windows.Shared;assembly=Syncfusion.Shared.WPF"
@@ -11,8 +10,8 @@
     Title=""
     Width="1300"
     Height="1024"
-    d:DataContext="{d:DesignInstance local:MainWindowViewModel}"
-    Icon="Resources/logo-32.png"
+    d:DataContext="{d:DesignInstance ui:MainWindowViewModel}"
+    Icon="../Resources/logo-32.png"
     ShowIcon="False"
     TitleBarForeground="{StaticResource PrimaryBrush}"
     TitleBarHeight="40"
@@ -81,7 +80,6 @@
             Grid.Row="0"
             Grid.Column="0"
             Grid.ColumnSpan="2">
-
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="1*" MinWidth="100" />
                 <ColumnDefinition Width="5*" MinWidth="300" />
@@ -91,8 +89,10 @@
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="Auto" />
                     <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="Auto" />
                 </Grid.ColumnDefinitions>
-                <Viewbox>
+                <Viewbox Margin="0,0,10,0">
                     <Path
                         Width="20"
                         Height="20"
@@ -117,16 +117,82 @@
                     x:Name="SearchBox"
                     Grid.Column="1"
                     Height="28"
+                    Padding="3"
                     HorizontalAlignment="Stretch"
-                    AutoCompleteMode="Suggest"
-                    AutoCompleteSource="{Binding SongTags}"
-                    MultiSelectMode="Token"
-                    SelectedItems="{Binding SearchItems, Mode=OneWayToSource}"
-                    ShowClearButton="True"
-                    SuggestionMode="ContainsOrdinal"
-                    Text="{Binding SearchText, Mode=OneWayToSource, UpdateSourceTrigger=PropertyChanged}"
-                    TextHighlightMode="MultipleOccurrence"
-                    Watermark="Liedersuche ..." />
+                    VerticalAlignment="Center"
+                    FontSize="15"
+                    Foreground="{StaticResource PrimaryBrush}"
+                    Text="{Binding SearchText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                    Watermark="Liedersuche…">
+                    <syncfusion:SfTextBoxExt.WatermarkTemplate>
+                        <DataTemplate>
+                            <TextBlock
+                                VerticalAlignment="Center"
+                                FontSize="13"
+                                Foreground="Black"
+                                Opacity="0.5"
+                                Text="{Binding}"
+                                TextAlignment="Left" />
+                        </DataTemplate>
+                    </syncfusion:SfTextBoxExt.WatermarkTemplate>
+                </syncfusion:SfTextBoxExt>
+                <syncfusion:ComboBoxAdv
+                    x:Name="SearchTagCombo"
+                    Grid.Column="2"
+                    Width="250"
+                    Height="28"
+                    Margin="5,0,0,0"
+                    VerticalAlignment="Center"
+                    AllowMultiSelect="True"
+                    DefaultText="Lieder-Tags…"
+                    ItemsSource="{Binding AvailableSongTags}"
+                    SelectedItems="{Binding SelectedSongTags, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                    SelectedValueDelimiter=" ">
+                    <syncfusion:ComboBoxAdv.SelectionBoxTemplate>
+                        <DataTemplate>
+                            <Border Background="{StaticResource PrimaryBrush}" CornerRadius="5">
+                                <TextBlock
+                                    Margin="5,2"
+                                    FontSize="13"
+                                    Foreground="White"
+                                    Text="{Binding ., Mode=TwoWay}" />
+                            </Border>
+                        </DataTemplate>
+                    </syncfusion:ComboBoxAdv.SelectionBoxTemplate>
+                </syncfusion:ComboBoxAdv>
+                <Button
+                    Grid.Column="3"
+                    Width="28"
+                    Height="28"
+                    Margin="3"
+                    Background="Transparent"
+                    BorderThickness="0"
+                    Command="{Binding ClearSearchCommand}"
+                    FontSize="10"
+                    FontWeight="SemiBold"
+                    ToolTip="Suche zurücksetzen">
+                    <Button.Content>
+                        <Path
+                            Width="12"
+                            Height="12"
+                            Margin="5"
+                            Fill="DarkGray"
+                            RenderTransformOrigin="0.5,0.5"
+                            Stretch="Uniform">
+                            <Path.Data>
+                                <PathGeometry Figures="M1.921875,42L10.875,42 20.15625,58.40625 22.171875,62.15625 22.359375,62.15625 34.359375,42 42.84375,42 26.71875,66.28125 42.5625,90 33.609375,90 24.1875,74.4375 22.078125,70.78125 21.890625,70.78125 21.22265625,71.90625 19.6875,74.4375 10.078125,90 1.21875,90 17.578125,66.46875 1.921875,42z" FillRule="Nonzero" />
+                            </Path.Data>
+                            <Path.RenderTransform>
+                                <TransformGroup>
+                                    <TransformGroup.Children>
+                                        <RotateTransform Angle="0" />
+                                        <ScaleTransform ScaleX="1" ScaleY="1" />
+                                    </TransformGroup.Children>
+                                </TransformGroup>
+                            </Path.RenderTransform>
+                        </Path>
+                    </Button.Content>
+                </Button>
             </Grid>
         </Grid>
 
@@ -214,7 +280,8 @@
                 <StackPanel
                     Grid.Row="0"
                     Background="{StaticResource PrimaryBrush}"
-                    Orientation="Horizontal">
+                    Orientation="Horizontal"
+                    Visibility="{Binding SelectedSong, Converter={StaticResource NullToVisibilityConverter}}">
                     <TextBlock
                         Margin="5"
                         FontSize="14"
@@ -228,65 +295,28 @@
                         Text="{Binding SelectedSong.Title}" />
                 </StackPanel>
 
-                <ui:PreviewSongDocument Grid.Row="1" Song="{Binding SelectedSong}" />
+                <ui:PreviewSongDocument
+                    Grid.Row="1"
+                    Song="{Binding SelectedSong}"
+                    Visibility="{Binding SelectedSong, Converter={StaticResource NullToVisibilityConverter}}" />
 
-                <!--<FlowDocumentReader Grid.Row="1">
-                    <FlowDocumentReader.Document>
-                        <FlowDocument>
-                            <FlowDocument.Resources>
-                                <Style x:Key="RefrainStyle" TargetType="{x:Type Run}">
-                                    <Setter Property="FontWeight" Value="Semibold" />
-                                </Style>
-                            </FlowDocument.Resources>
-                            <Section xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation">
-                                <Paragraph Name="Anfang">
-                                    <LineBreak /><Run Style="{DynamicResource RefrainStyle}">
-                                        Herr, du gibst uns Hoffnung, du änderst unser Leben.
-                                        Grosses wird gross, Kleines wird klein.
-                                        Du willst uns gestalten, uns Geist und Leben geben.
-                                        Herr, wir brauchen dich! Du lässt uns nicht allein.
-                                    </Run><LineBreak /><LineBreak />
-                                    Du weisst, wie oft wir mutlos sind,
-                                    wie die Angst gewinnt
-                                    und uns jede Hoffnung nehmen will.
-                                    Doch deine Liebe ist so gross
-                                    und lässt uns nicht los.
-                                    Bei dir werden alle Ängste still.</Paragraph>
-                                <Paragraph Name="Strophe2">
-                                    Wir sind gefangen in der Welt,
-                                    halten was nicht hält und begreifen nicht,
-                                    wie gross du bist;
-                                    dass du dich Herr und König nennst,
-                                    und dass du uns kennst,
-                                    dass dein Plan für uns schon fertig ist.
-                                </Paragraph>
-                                <Paragraph Name="Strophe3Refrain" ToolTip="Strophe 3 &amp; Refrain">
-                                    Wie oft verträumen wir die Zeit
-                                    und sind nicht bereit,
-                                    als Gesandte in die Welt zu gehn.
-                                    Herr, der du deine Kraft verheisst:
-                                    Füll uns mit dem Geist,
-                                    lass ihn neu durch unser Leben wehn.<LineBreak /><Run Style="{DynamicResource RefrainStyle}">
-                                        Herr, du gibst uns Hoffnung, du änderst unser Leben.
-                                        Grosses wird gross, Kleines wird klein.
-                                        Du willst uns gestalten, uns Geist und Leben geben.
-                                        Herr, wir brauchen dich! Du lässt uns nicht allein.
-                                    </Run><LineBreak /><LineBreak />
-                                </Paragraph>
-                            </Section>
-                        </FlowDocument>
-                    </FlowDocumentReader.Document>
-                </FlowDocumentReader>-->
+                <TextBlock
+                    Grid.Row="1"
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Center"
+                    Foreground="DimGray"
+                    Text="Kein Lied augewählt"
+                    Visibility="{Binding SelectedSong, Converter={StaticResource NullToVisibilityConverter}, ConverterParameter={x:Static Visibility.Visible}}" />
             </Grid>
-
         </Border>
 
         <Grid
             Grid.Row="2"
+            Grid.Column="0"
             Grid.ColumnSpan="2"
             HorizontalAlignment="Stretch"
             VerticalAlignment="Stretch">
-            <Button Command="{Binding PresentSongCommand}" Content="{Binding PresentSongButtonText}" />
+            <Button Command="{Binding StartPresentationFromSelectedSongCommand}" Content="{Binding PresentSongButtonText}" />
         </Grid>
     </Grid>
 </syncfusion:ChromelessWindow>

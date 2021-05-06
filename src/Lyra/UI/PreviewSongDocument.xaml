@@ -9,6 +9,7 @@
     mc:Ignorable="d">
     <Grid HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
         <FlowDocumentReader
+            x:Name="FlowDocumentReader"
             HorizontalAlignment="Stretch"
             VerticalAlignment="Stretch"
             Document="{Binding Document, RelativeSource={RelativeSource FindAncestor, AncestorType=UserControl}}"

@@ -4,6 +4,7 @@ using System.Linq;
 using System.Security;
 using System.Text.RegularExpressions;
 using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Documents;
 using System.Windows.Markup;
 using System.Windows.Media;
@@ -12,7 +13,8 @@ namespace Lyra.UI
 {
     public class SongFlowDocument : FlowDocument
     {
-        private const string TopJumpmarkName = "top";
+        private readonly bool showJumpmarkButtons;
+        private const string TopJumpmarkName = "Anfang";
         private const string JumpmarkStyle = nameof(JumpmarkStyle);
         private const string BoldStyle = nameof(BoldStyle);
         private const string ItalicStyle = nameof(ItalicStyle);
@@ -23,8 +25,9 @@ namespace Lyra.UI
             "<jumpmark.*name=\"(?<name>.*)\".*/>",
             RegexOptions.Compiled | RegexOptions.CultureInvariant | RegexOptions.IgnoreCase | RegexOptions.Multiline);
 
-        public SongFlowDocument(SongViewModel song, PresentationStyleViewModel style)
+        public SongFlowDocument(SongViewModel song, PresentationStyleViewModel style, bool showJumpmarkButtons)
         {
+            this.showJumpmarkButtons = showJumpmarkButtons;
             FontFamily = style.NormalFontFamily;
             Foreground = style.ForegroundColor;
             FontSize = style.FontSize;
@@ -53,19 +56,32 @@ namespace Lyra.UI
 
             var xamlText = ToXamlString(song.Text);
             var songTextBlock = (Section)XamlReader.Parse(xamlText);
+            var blocks = songTextBlock.Blocks.ToList();
+            for (var i = 0; i < blocks.Count; i++)
+            {
+                if (blocks[i] is BlockUIContainer uiContainer)
+                {
+                    var button = (Button)uiContainer.Child;
+                    button.Click += (s, e) =>
+                    {
+                        song.ActivateJumpmark(button.Tag.ToString());
+                    };
+                }
+            }
+
             Blocks.Add(songTextBlock);
         }
 
         private string ToXamlString(string songText)
         {
             var paragraphs = GetJumparkParagraphs(songText);
-            var documentXaml = $@"<Section xmlns=""http://schemas.microsoft.com/winfx/2006/xaml/presentation"">
+            var documentXaml = $@"<Section xmlns=""http://schemas.microsoft.com/winfx/2006/xaml/presentation"" xmlns:x=""http://schemas.microsoft.com/winfx/2006/xaml"">
 {string.Join(Environment.NewLine, paragraphs.Select(ReplaceAllTags))}
 </Section>";
             return documentXaml;
         }
 
-        private static IReadOnlyList<string> GetJumparkParagraphs(string songText)
+        private IReadOnlyList<string> GetJumparkParagraphs(string songText)
         {
             var jumpmarkCount = 1;
             if (!songText.StartsWith("<jumpmark", StringComparison.InvariantCultureIgnoreCase))
@@ -91,8 +107,8 @@ namespace Lyra.UI
 
             void AddParagraph(string jumpmarkName, string text)
             {
-                var jumpmark = jumpmarkName != TopJumpmarkName ? $"<Span Style=\"{{DynamicResource {JumpmarkStyle}}}\">{EscapeText(jumpmarkName)}</Span>" : string.Empty;
-                paragraphs.Add($"<Paragraph Name=\"jumpmark{jumpmarkCount++}\" Tag=\"{EscapeText(jumpmarkName)}\">{jumpmark}<LineBreak />{EscapeText(text)}</Paragraph>");
+                var jumpmarkButton = showJumpmarkButtons ? $"<BlockUIContainer><Button x:Name=\"jumpmarkButton{jumpmarkCount}\" Tag=\"jumpmark{jumpmarkCount}\">{EscapeText(jumpmarkName)}</Button></BlockUIContainer>" : string.Empty;
+                paragraphs.Add($"{jumpmarkButton}<Paragraph Padding=\"5\" Name=\"jumpmark{jumpmarkCount++}\" Tag=\"{EscapeText(jumpmarkName)}\">{EscapeText(text)}</Paragraph>");
             }
 
             return paragraphs;

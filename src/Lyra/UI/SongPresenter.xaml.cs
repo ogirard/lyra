@@ -1,7 +1,10 @@
+using System;
+using System.ComponentModel;
 using System.Windows;
 using System.Windows.Input;
 using Lyra.Features.Config;
 using Microsoft.Extensions.Logging;
+using ReactiveUI;
 
 namespace Lyra.UI
 {
@@ -24,13 +27,22 @@ namespace Lyra.UI
 
         private void OnLoaded(object sender, RoutedEventArgs e)
         {
-            var screen = presenterConfigService.GetSelectedPresenterScreen();
-            this.Top = screen.Bounds.Top;
-            this.Left = screen.Bounds.Left;
-            this.Width = screen.Bounds.Width;
-            this.Height = screen.Bounds.Height;
-            WindowState = WindowState.Maximized;
-            logger.LogTrace($"Presenting on screen '{screen.DeviceName}', bounds: {screen.Bounds}");
+            this.WhenAnyValue(x => x.ViewModel.Screen).Subscribe(x =>
+            {
+                WindowState = WindowState.Normal;
+                this.Top = x.Bounds.Top;
+                this.Left = x.Bounds.Left;
+                this.Width = x.Bounds.Width;
+                this.Height = x.Bounds.Height;
+                WindowState = WindowState.Maximized;
+                logger.LogTrace($"Presenting on screen '{x.DeviceName}', bounds: {x.Bounds}");
+            });
+        }
+
+        protected override void OnClosing(CancelEventArgs e)
+        {
+            ViewModel.IsPresentationActive = false;
+            e.Cancel = true;
         }
 
         public SongPresenterViewModel ViewModel

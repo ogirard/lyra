@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using Microsoft.Extensions.Configuration;
 
-namespace Lyra
+namespace Lyra.Framework
 {
     public static class Extensions
     {

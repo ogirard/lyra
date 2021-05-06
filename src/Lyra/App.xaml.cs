@@ -11,6 +11,7 @@ using Lyra.Features.Search;
 using Lyra.Features.SessionTracking;
 using Lyra.Features.Songs;
 using Lyra.Features.Styles;
+using Lyra.UI;
 using MediatR;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;

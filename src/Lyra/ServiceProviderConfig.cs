@@ -14,21 +14,21 @@ namespace Lyra
         {
             services.AddSingleton<MainWindow>();
             services.AddTransient<MainWindowViewModel>();
-            services.AddTransient<SongPresenterViewModel>();
+            services.AddSingleton<SongPresenterViewModel>();
             services.AddTransient<SongPresenter>();
+            services.AddTransient<JumpmarkActivatedHandler>();
             return services;
         }
 
         public static IServiceCollection AddDatabase(this IServiceCollection services, IConfiguration configuration)
         {
-            services.Configure<DatabaseOptions>(configuration.GetSection("Database"));
             services.Configure<LyraOptions>(configuration.GetSection("Lyra"));
 
             // Register db and repo
             services.AddSingleton<ILiteDatabase>(sp =>
             {
-                var options = sp.GetRequiredService<IOptions<DatabaseOptions>>();
-                var connectionString = new ConnectionString(options.Value.ConnectionString
+                var options = sp.GetRequiredService<IOptions<LyraOptions>>();
+                var connectionString = new ConnectionString(options.Value.DatabaseConnectionString
                     .Replace("%APPDATA%", Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData)));
                 Directory.CreateDirectory(Path.GetDirectoryName(connectionString.Filename));
                 return new LiteDatabase(connectionString);

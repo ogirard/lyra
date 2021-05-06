@@ -1,10 +1,11 @@
 using System.Windows;
 using System.Windows.Media;
 using Lyra.Features.Styles;
+using ReactiveUI;
 
 namespace Lyra.UI
 {
-    public class PresentationStyleViewModel
+    public class PresentationStyleViewModel : ReactiveObject
     {
         private readonly PresentationStyle style;
 

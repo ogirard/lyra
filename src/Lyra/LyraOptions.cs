@@ -5,5 +5,7 @@ namespace Lyra
         public string Locale { get; set; }
 
         public string Version { get; set; }
+
+        public string DatabaseConnectionString { get; set; }
     }
 }

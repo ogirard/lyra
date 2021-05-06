@@ -33,7 +33,7 @@ namespace Lyra.Features.SessionTracking
             }
 
             dbRepository.Insert(metric, collectionName: metricName);
-            logger.LogTrace($"Logged session metric: {metricName}{(song == null ? string.Empty : $" for song {song.Id}")}'");
+            logger.LogTrace($"Logged session metric: {metricName}{(song == null ? string.Empty : $" for song '{song.DisplayText}'")}'");
         }
     }
 }

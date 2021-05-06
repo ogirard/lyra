@@ -1,13 +1,12 @@
-using System;
 using System.IO;
 using System.Linq;
 using Lyra.Console.Migration.LegacyModel;
+using Lyra.Features.Config;
 using Lyra.Features.Songs;
 using Lyra.Features.Styles;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using Serilog.Core;
 
 namespace Lyra.Console.Migration
 {
@@ -15,17 +14,25 @@ namespace Lyra.Console.Migration
     {
         private readonly ILogger<Migrator> logger;
         private readonly IConfiguration configuration;
-        private readonly DatabaseOptions databaseOptions;
+        private readonly LyraOptions lyraOptions;
         private readonly ISongRepository songRepository;
         private readonly IStyleRepository styleRepository;
+        private readonly IPresenterConfigService presenterConfigService;
 
-        public Migrator(ILogger<Migrator> logger, IConfiguration configuration, IOptionsMonitor<DatabaseOptions> dataOptions, ISongRepository songRepository, IStyleRepository styleRepository)
+        public Migrator(
+            ILogger<Migrator> logger,
+            IConfiguration configuration,
+            IOptionsMonitor<LyraOptions> lyraOptions,
+            ISongRepository songRepository,
+            IStyleRepository styleRepository,
+            IPresenterConfigService presenterConfigService)
         {
             this.logger = logger;
             this.configuration = configuration;
-            this.databaseOptions = dataOptions.CurrentValue;
+            this.lyraOptions = lyraOptions.CurrentValue;
             this.songRepository = songRepository;
             this.styleRepository = styleRepository;
+            this.presenterConfigService = presenterConfigService;
         }
 
         public static void Cleanup(string dbPath, Serilog.ILogger logger)
@@ -64,8 +71,8 @@ namespace Lyra.Console.Migration
                 },
                 Title = new TitleStyle
                 {
-                    BackgroundColor = "#FFCCCCCC",
-                    ForegroundColor = "#FFB76BAB",
+                    BackgroundColor = "#FF5B3656",
+                    ForegroundColor = "#FFFFFFFF",
                     FontSize = 35,
                     Mode = TitleStyle.TitleMode.ShowNumberAndTitle,
                     TitleFont = "Roboto Slab",
@@ -86,6 +93,28 @@ namespace Lyra.Console.Migration
                 });
             }
 
+            var screens = presenterConfigService.GetScreens().ToList();
+            var index = 0;
+            foreach (var screen in screens)
+            {
+                System.Console.WriteLine($"[{index}] {screen.DeviceName} (bounds: {screen.Bounds})");
+                index++;
+            }
+
+            System.Console.WriteLine("Choose default screen: ");
+            var key = System.Console.ReadKey();
+            if (int.TryParse(key.ToString(), out var selectedIndex))
+            {
+                if (selectedIndex >= screens.Count || selectedIndex < 0)
+                {
+                    selectedIndex = 0;
+                }
+            }
+
+            var selectedScreen = screens[selectedIndex];
+            presenterConfigService.SelectPresenterScreen(screens[selectedIndex]);
+            logger.LogInformation(
+                $"Configured {selectedScreen.DeviceName} (bounds: {selectedScreen.Bounds}) as default");
             return legacyStore;
         }
     }

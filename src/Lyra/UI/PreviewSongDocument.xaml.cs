@@ -10,7 +10,7 @@ namespace Lyra.UI
     /// </summary>
     public partial class PreviewSongDocument : UserControl
     {
-        private static readonly PresentationStyle PreviewStyle = new PresentationStyle
+        private static readonly PresentationStyle PreviewStyle = new()
         {
             Id = "PresentationStyle/__preview",
             Body = new()
@@ -59,7 +59,7 @@ namespace Lyra.UI
                 return;
             }
 
-            songDocument.Document = new SongFlowDocument(song, PreviewStyleViewModel)
+            songDocument.Document = new SongFlowDocument(song, PreviewStyleViewModel, true)
                     .ActivateColumnOverflow((songDocument.ActualWidth - 100) / 2);
         }
 

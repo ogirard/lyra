@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Reflection;
 using Lucene.Net.QueryParsers.Classic;
 using Lyra.Features.Songs;
 using Microsoft.Extensions.Logging;
@@ -57,6 +56,11 @@ namespace Lyra.Features.Search
             var numbers = new List<int>();
             var part = string.Empty;
             var isQuoteOpen = false;
+            if (string.IsNullOrEmpty(query))
+            {
+                return (parts, numbers);
+            }
+
             foreach (var character in query.Trim(' '))
             {
                 switch (character)
@@ -117,7 +121,7 @@ namespace Lyra.Features.Search
             var indexQuery = string.Join(
                 $" {Operator.OR:G} ",
                 numbers.Select(n => $"{SearchIndex.IndexFieldNumber}:{n}^{NumberBoost}")
-                    .Concat(parts.Select(p => $"{SearchIndex.IndexFieldTitle}:{p}^{TitleBoost} {Operator.OR:G} {SearchIndex.IndexFieldText}:{p}^{TextBoost}")));
+                    .Concat(parts.Select(p => $"{SearchIndex.IndexFieldTitle}:\"{p}\"^{TitleBoost} {Operator.OR:G} {SearchIndex.IndexFieldText}:\"{p}\"^{TextBoost}")));
             logger.LogTrace($"Translated query '{query}' to index query '{indexQuery}'");
             return (indexQuery, numbers);
         }
@@ -132,9 +136,19 @@ namespace Lyra.Features.Search
             }
 
             var stopwatch = Stopwatch.StartNew();
-            var tagFilteredSongs = tags?.Any() ?? false
+            var tagFilteredSongs = tags.Any()
                 ? songs.Where(s => !tags.Any() || tags.Any(t => s.Tags.Contains(t, StringComparer.InvariantCultureIgnoreCase)))
                 : songs;
+            if (string.IsNullOrEmpty(query))
+            {
+                return tagFilteredSongs.Select(s => new SearchResult
+                {
+                    Song = s,
+                    IsMatch = true,
+                    Score = 1.0f,
+                }).ToList();
+            }
+
             var (indexQuery, numbers) = CreateIndexQuery(query);
             var indexResults = searchIndex.Search(indexQuery);
             var results = indexResults

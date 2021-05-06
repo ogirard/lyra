@@ -1,4 +1,4 @@
-namespace Lyra
+namespace Lyra.UI
 {
     public class ThemeOptions
     {
